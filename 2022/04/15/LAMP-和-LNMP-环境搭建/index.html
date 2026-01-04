@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="本文介绍如何在 Ubuntu 下安装 LAMP 和 LNMP 环境 简介LAMP：即 Liunx 下 Apache，MySQL，PHP 环境LNMP：即 Linux 下 Nginx，MySQL，PHP 环境 **搭建环境：**Ubuntu 20.04 LTS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LAMP 和 LNMP 环境搭建">
+<meta property="og:url" content="https://paoka1.top/2022/04/15/LAMP-%E5%92%8C-LNMP-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="本文介绍如何在 Ubuntu 下安装 LAMP 和 LNMP 环境 简介LAMP：即 Liunx 下 Apache，MySQL，PHP 环境LNMP：即 Linux 下 Nginx，MySQL，PHP 环境 **搭建环境：**Ubuntu 20.04 LTS">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Nginx_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Nginx_Setting_1.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Nginx_Setting_2.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Index_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/PHP_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/MySQL_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Apache_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/Index_Ok.png">
+<meta property="og:image" content="https://paoka1.top/image/post/2022/04/PHP_Ok.png">
+<meta property="article:published_time" content="2022-04-15T14:21:37.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:24:18.799Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="环境搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2022/04/Nginx_Ok.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2022/04/15/LAMP-%E5%92%8C-LNMP-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2022/04/15/LAMP-%E5%92%8C-LNMP-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/","path":"2022/04/15/LAMP-和-LNMP-环境搭建/","title":"LAMP 和 LNMP 环境搭建"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LAMP 和 LNMP 环境搭建 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%8D%A2%E6%BA%90"><span class="nav-number">2.1.</span> <span class="nav-text">第一步：换源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%9B%B4%E6%96%B0%E8%BD%AF%E4%BB%B6%EF%BC%88%E5%88%97%E8%A1%A8%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">第二步：更新软件（列表）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LNMP-%E7%9A%84%E6%90%AD%E5%BB%BA"><span class="nav-number">3.</span> <span class="nav-text">LNMP 的搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9ANginx-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">软件：Nginx 的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9APHP-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">3.2.</span> <span class="nav-text">软件：PHP 的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9AMySQL-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">3.3.</span> <span class="nav-text">软件：MySQL 的安装</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LAMP-%E7%9A%84%E6%90%AD%E5%BB%BA"><span class="nav-number">4.</span> <span class="nav-text">LAMP 的搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9AApache-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">4.1.</span> <span class="nav-text">软件：Apache 的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9APHP-%E7%9A%84%E6%90%AD%E5%BB%BA"><span class="nav-number">4.2.</span> <span class="nav-text">软件：PHP 的搭建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%EF%BC%9A%E5%AE%89%E8%A3%85-MySQL"><span class="nav-number">4.3.</span> <span class="nav-text">软件：安装 MySQL</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2022/04/15/LAMP-%E5%92%8C-LNMP-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LAMP 和 LNMP 环境搭建 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LAMP 和 LNMP 环境搭建
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-15 22:21:37" itemprop="dateCreated datePublished" datetime="2022-04-15T22:21:37+08:00">2022-04-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:24:18" itemprop="dateModified" datetime="2026-01-04T20:24:18+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>本文介绍如何在 Ubuntu 下安装 LAMP 和 LNMP 环境</p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><strong>LAMP</strong>：即 Liunx 下 Apache，MySQL，PHP 环境<br><strong>LNMP</strong>：即 Linux 下 Nginx，MySQL，PHP 环境</p>
+<p>**搭建环境：**Ubuntu 20.04 LTS</p>
+<span id="more"></span>
+
+<p><em><strong>若无特殊说明，请使用 root 身份来运行本文中的命令</strong>，本文只介绍基本的环境搭建，不包括网站的搭建和管理</em></p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="第一步：换源"><a href="#第一步：换源" class="headerlink" title="第一步：换源"></a>第一步：换源</h4><p>备份源</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /etc/apt/sources.list /etc/apt/sources.list.bak</span><br></pre></td></tr></table></figure>
+
+<p>更换源</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/apt/sources.list</span><br></pre></td></tr></table></figure>
+
+<p>内容更换为（内容与 Ubuntu 版本有关，详见文末参考链接）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse</span><br></pre></td></tr></table></figure>
+
+<h4 id="第二步：更新软件（列表）"><a href="#第二步：更新软件（列表）" class="headerlink" title="第二步：更新软件（列表）"></a>第二步：更新软件（列表）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 更新软件列表信息</span></span><br><span class="line"><span class="built_in">sudo</span> apt-get update</span><br><span class="line"><span class="comment"># 更新软件（可选）</span></span><br><span class="line"><span class="built_in">sudo</span> apt-get upgrade</span><br></pre></td></tr></table></figure>
+
+<h3 id="LNMP-的搭建"><a href="#LNMP-的搭建" class="headerlink" title="LNMP 的搭建"></a>LNMP 的搭建</h3><h4 id="软件：Nginx-的安装"><a href="#软件：Nginx-的安装" class="headerlink" title="软件：Nginx 的安装"></a>软件：Nginx 的安装</h4><p>执行下面的命令来安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install nginx</span><br></pre></td></tr></table></figure>
+
+<p>安装完后访问 IP（服务器 IP 或 127.0.0.1） 即可见效（开盒即食，真好用）</p>
+<p><img src="/image/post/2022/04/Nginx_Ok.png" alt="Nginx 默认页面"></p>
+<p>相关命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">service nginx status </span><br><span class="line"><span class="comment"># 查看 nginx 是否开启</span></span><br><span class="line">service nginx stop</span><br><span class="line"><span class="comment"># 关闭 nginx 服务</span></span><br><span class="line">service nginx start</span><br><span class="line"><span class="comment"># 打开 nginx 服务</span></span><br><span class="line">service nginx restart</span><br><span class="line"><span class="comment"># 重启 nginx 服务</span></span><br><span class="line">systemctl status nginx</span><br><span class="line"><span class="comment"># 查看 nginx 服务的状态</span></span><br></pre></td></tr></table></figure>
+
+<p>相关文件</p>
+<blockquote>
+<p><strong>内容</strong></p>
+<ul>
+<li><code>/var/www/html</code>默认的 Web 页面，默认打开可以看到 Nginx 页面</li>
+<li><code>/var/www/html</code>实际的 Web 内容，默认下只有 Nginx 自己的原生页面，我们可以通过更改 Nginx 配置来更改</li>
+</ul>
+<p><strong>服务器配置</strong></p>
+<ul>
+<li><strong><code>/etc/nginx</code>Nginx 配置目录。所有 Nginx 的配置文件都在这里</strong></li>
+<li><code>/etc/nginx/nginx.conf</code>Nginx 的配置文件，大多数全局配置可以通过这个文件来修改</li>
+<li><code>/etc/nginx/sites-available/sites-enabled</code>用来存储服务器下每个站点服务器块的目录， 默认情况下 Nginx 不会直接使用目录下的配置文件，需要我们更改配置来告诉 Nginx 来去读</li>
+<li><code>/etc/nginx/sites-enabled/sites-available</code>这里是存储已经启用站点服务器块的目录</li>
+<li><code>/etc/nginx/snippets</code>这个目录包含一些 Nginx 的配置文件，可打开详细查看这些配置文件到文档进行学习</li>
+</ul>
+<p><strong>服务器日志</strong></p>
+<ul>
+<li><code>/var/log/nginx/access.log</code>这里是 Nginx 到日志文件，对 Web 服务器的每个请求都会记录在这个日志中</li>
+<li><code>/var/log/nginx/error.log</code>记录 Nginx 运行过程中发生的错误日志</li>
+</ul>
+</blockquote>
+<h4 id="软件：PHP-的安装"><a href="#软件：PHP-的安装" class="headerlink" title="软件：PHP 的安装"></a>软件：PHP 的安装</h4><p>执行下面的命令来安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install php7.4-fpm</span><br></pre></td></tr></table></figure>
+
+<p>验证安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -v</span><br></pre></td></tr></table></figure>
+
+<p>配置 Nginx 设置（两种方法比较见文末链接）</p>
+<ol>
+<li><p><strong>第一种方法（php-fpm）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/nginx/sites-available/default</span><br></pre></td></tr></table></figure>
+
+<p>内容修改为</p>
+<p><img src="/image/post/2022/04/Nginx_Setting_1.png" alt="Nginx 的配置文件"></p>
+<p>然后重启 Nginx</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service nginx restart</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>第二种方法（php-cgi）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/nginx/sites-available/default</span><br></pre></td></tr></table></figure>
+
+<p>修改内容为</p>
+<p><img src="/image/post/2022/04/Nginx_Setting_2.png" alt="Nginx 的配置文件"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/php/7.4/fpm/pool.d/www.conf</span><br></pre></td></tr></table></figure>
+
+<p>在 37 行添加</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listen = 127.0.0.1:9000</span><br></pre></td></tr></table></figure>
+
+<p>安装 php-cgi</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install php7.4-cgi</span><br></pre></td></tr></table></figure>
+
+<p><strong>重启服务器或者虚拟机即可</strong></p>
+</li>
+</ol>
+<p>验证 PHP Nginx 配置</p>
+<ol>
+<li><p>进入<code>/var/www/html</code>删除原有的<code>.html</code>文件</p>
+</li>
+<li><p>创建<code>index.html</code>和<code>phpinfo.php</code>内容如下</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>hello world<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h3</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;phpinfo.php&quot;</span>&gt;</span>Check phpinfo<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>phpinfo.php</code>内容如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问 IP 或 127.0.0.1 查看主页面和 phpinfo</p>
+<p><img src="/image/post/2022/04/Index_Ok.png" alt="主页面"></p>
+<p><img src="/image/post/2022/04/PHP_Ok.png" alt="phpinfo"></p>
+</li>
+</ol>
+<h4 id="软件：MySQL-的安装"><a href="#软件：MySQL-的安装" class="headerlink" title="软件：MySQL 的安装"></a>软件：MySQL 的安装</h4><p>执行下面的命令来安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install mysql-server</span><br></pre></td></tr></table></figure>
+
+<p>相关命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">service mysql status</span><br><span class="line"><span class="comment"># 查看 Mysql 状态</span></span><br><span class="line">service mysql start</span><br><span class="line"><span class="comment"># 启用 MySQL</span></span><br><span class="line">service mysql stop</span><br><span class="line"><span class="comment"># 停用 MySQL</span></span><br><span class="line">service mysql restart</span><br><span class="line"><span class="comment"># 重启 MySQL</span></span><br></pre></td></tr></table></figure>
+
+<p>修改密码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 输入下面的命令两次回车即可登录（密码为空）</span></span><br><span class="line">mysql -u root -p</span><br><span class="line">ALTER USER <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED WITH mysql_native_password BY <span class="string">&#x27;你的密码&#x27;</span>;</span><br><span class="line">flush privileges;</span><br><span class="line"><span class="built_in">exit</span></span><br></pre></td></tr></table></figure>
+
+<p>再次登录就需要密码了</p>
+<p><strong>让我们再来验证一下安装，首先安装<code>php-mysql</code>（没有它 php 就使用不了 MySQL）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install php7.4-mysql</span><br></pre></td></tr></table></figure>
+
+<p>在<code>/var/www/html</code>创建<code>mysql.php</code>，内容如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 连接 MySQL 的函数</span></span><br><span class="line"><span class="variable">$con</span> = <span class="title function_ invoke__">mysqli_connect</span>(<span class="string">&#x27;127.0.0.1&#x27;</span>, <span class="string">&#x27;root&#x27;</span>, <span class="string">&#x27;你设置的密码&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$con</span>)&#123;</span><br><span class="line">    <span class="comment">// 连接成功</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;Connected sucessfully!&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="comment">// 连接失败</span></span><br><span class="line">    <span class="title function_ invoke__">printf</span>(<span class="string">&quot;Can&#x27;t connect to MySQL. Errorcode: &quot;</span>.<span class="title function_ invoke__">mysqli_connect_error</span>());</span><br><span class="line">    <span class="keyword">exit</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 关闭连接</span></span><br><span class="line"><span class="title function_ invoke__">mysqli_close</span>(<span class="variable">$con</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>访问<code>服务器 IP + /mysql.php</code>或<code>127.0.0.1/mysql.php</code>如果看到下图，那就成功了（基于上文安装的 Nginx，PHP）</p>
+<p><img src="/image/post/2022/04/MySQL_Ok.png" alt="MySQL 成功地被连接了"></p>
+<h3 id="LAMP-的搭建"><a href="#LAMP-的搭建" class="headerlink" title="LAMP 的搭建"></a>LAMP 的搭建</h3><h4 id="软件：Apache-的安装"><a href="#软件：Apache-的安装" class="headerlink" title="软件：Apache 的安装"></a>软件：Apache 的安装</h4><p><em>请先使用上文的命令停止 Nginx</em></p>
+<p>执行下面的命令来安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install apache2</span><br></pre></td></tr></table></figure>
+
+<p>相关命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">service apache2 status </span><br><span class="line"><span class="comment"># 查看 apache 是否开启</span></span><br><span class="line">service apache2 stop</span><br><span class="line"><span class="comment"># 关闭 apache 服务</span></span><br><span class="line">service apache2 start</span><br><span class="line"><span class="comment"># 打开 apache 服务</span></span><br><span class="line">service apache2 restart</span><br><span class="line"><span class="comment"># 重启 apache 服务</span></span><br><span class="line">systemctl status apache2 </span><br><span class="line"><span class="comment"># 查看 apache 服务的状态</span></span><br></pre></td></tr></table></figure>
+
+<p>检验，访问服务器 IP 或 127.0.0.1，出现下图则成功</p>
+<p><img src="/image/post/2022/04/Apache_Ok.png" alt="Apache 默认页面"></p>
+<p>相关文件</p>
+<blockquote>
+<p><strong>内容</strong></p>
+<ul>
+<li>在<code>/var/www/html</code>等包括网页内容，可以在 Apache 配置文件中更改此设置</li>
+</ul>
+<p><strong>服务器配置</strong></p>
+<ul>
+<li><p><code>/etc/apache2</code><strong>全部</strong> Apache 配置文件住这里</p>
+</li>
+<li><p><code>/etc/apache2/apache2.conf</code>关于 Apache <strong>主配置文件</strong></p>
+</li>
+<li><p><code>/etc/apache2/ports.conf</code>此文件指定 Apache 将 <strong>监听的端口</strong></p>
+</li>
+<li><p><code>/etc/apache2/sites-available/</code>每个站点可以在其中存储虚拟主机的目录。 <strong>除非将配置文件链接到启用站点的目录，否则 Apache 将不会使用在此目录中找到的配置文件</strong>， 通常，所有服务器锁定设置都在此目录中完成</p>
+</li>
+<li><p><code>/etc/apache2/启用了站点/</code>存储启用了站点的虚拟主机的目录。 <strong>这些通常是通过使用 a2ensite 链接到可用站点目录中的配置文件来创建的</strong>。 Apache 在启动或重新加载以编译完整配置时会读取此目录中的配置文件和链接</p>
+</li>
+<li><p><code>/etc/apache2/conf可用 /</code>，<code>/etc/apache2/conf启用/</code>这些目录与目录可用站点和已启用站点的关系相同，但是 <strong>用于存储不属于虚拟主机的配置片段</strong></p>
+</li>
+<li><p><code>/etc/apache2/mods可用/</code>，<code>/etc/apache2/mods启用/</code>这些目录 <strong>包含可用和启用的模块</strong> 分别 <strong>服务器日志</strong></p>
+</li>
+<li><p><code>/var/log/apache2/access.log</code><strong>对 Web 服务器的每个请求都记录在此日志文件中</strong> 除非另有说明</p>
+</li>
+<li><p><code>/var/log/apache2/Error.log</code>默认情况下， <strong>所有错误都记录在此文件中</strong></p>
+</li>
+</ul>
+</blockquote>
+<h4 id="软件：PHP-的搭建"><a href="#软件：PHP-的搭建" class="headerlink" title="软件：PHP 的搭建"></a>软件：PHP 的搭建</h4><p>执行下面的命令来安装</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install php7.<span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<p>检验</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -v</span><br></pre></td></tr></table></figure>
+
+<p>安装组件和扩展</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install php7.4-curl php7.4-cgi php7.4-json php-pear libapache2-mod-php php7.4-mysql</span><br></pre></td></tr></table></figure>
+
+<p>重启 Apache</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service apache2 restart</span><br></pre></td></tr></table></figure>
+
+<p>对安装进行验证</p>
+<ol>
+<li><p>进入<code>/var/www/html</code>删除原有的<code>.html</code>文件</p>
+</li>
+<li><p>创建<code>index.html</code>和<code>phpinfo.php</code>内容如下</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>hello world<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h3</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;phpinfo.php&quot;</span>&gt;</span>Check phpinfo<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>phpinfo.php</code>内容如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问 IP 或 127.0.0.1 查看主页面和 phpinfo</p>
+<p><img src="/image/post/2022/04/Index_Ok.png" alt="主页面"></p>
+<p><img src="/image/post/2022/04/PHP_Ok.png" alt="phpinfo"></p>
+</li>
+</ol>
+<h4 id="软件：安装-MySQL"><a href="#软件：安装-MySQL" class="headerlink" title="软件：安装 MySQL"></a>软件：安装 MySQL</h4><p>和配置 LNMP 时的操作类似，请读者自行安装验证 ~</p>
+<hr>
+<p>本文参考链接：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ProbeN1/p/15038682.html">LNMP环境搭建成功篇)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011198687/article/details/121103821">基础篇——ubuntu系统换源</a></p>
+<p><a target="_blank" rel="noopener" href="https://seizer.top/post/2021-09/LAMP%E5%92%8CLNMP%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E7%9A%84%E8%89%B0%E8%BE%9B%E5%8E%86%E7%A8%8B/">LAMP 和 LNMP 环境搭建的艰辛历程</a></p>
+<p><a target="_blank" rel="noopener" href="https://kalacloud.com/blog/how-to-install-nginx-on-ubuntu-20-04/">如何在 Ubuntu 20.04 中安装和配置 Nginx</a></p>
+<p><a target="_blank" rel="noopener" href="https://ubunlog.com/zh-CN/Apache-Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%89%E8%A3%85%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86ubuntu-20-04/#Archivos_importantes_y_directorios_de_Apache">Apache Web服务器，在Ubuntu 20.04上安装</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b430d0abad0e">使用php-fpm还是php-cgi？使用tcp还是socket？</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag"># 环境搭建</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/28/%E6%8B%BC%E5%9B%BE%E5%B7%A5%E5%85%B7-Gaps/" rel="prev" title="拼图工具 Gaps">
+                  <i class="fa fa-angle-left"></i> 拼图工具 Gaps
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/24/%E4%B8%80%E9%81%93%E7%AE%80%E5%8D%95%E7%9A%84-PHP-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="next" title="一道简单的 PHP 反序列化">
+                  一道简单的 PHP 反序列化 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

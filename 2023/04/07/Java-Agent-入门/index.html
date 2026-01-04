@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/image/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicons/favicon-16x16.png">
+  <link rel="mask-icon" href="/image/favicons/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"paoka1.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="本文简要介绍 Java Agent，快速入门 Java Agent 什么是 Java AgentJava Agent 本质上可以理解为一个插件，该插件就是一个精心提供的 Jar 包。只是启动方式和普通 Jar 包有所不同，对于普通的 Jar 包，通过指定类的 main 函数进行启动。但是 Java Agent 并不能单独启动，必须依附在一个 Java 应用程序运行，在面向切面编程方面应用比较广泛">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java Agent 入门">
+<meta property="og:url" content="https://paoka1.top/2023/04/07/Java-Agent-%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="Paoka1&#39;s Blog">
+<meta property="og:description" content="本文简要介绍 Java Agent，快速入门 Java Agent 什么是 Java AgentJava Agent 本质上可以理解为一个插件，该插件就是一个精心提供的 Jar 包。只是启动方式和普通 Jar 包有所不同，对于普通的 Jar 包，通过指定类的 main 函数进行启动。但是 Java Agent 并不能单独启动，必须依附在一个 Java 应用程序运行，在面向切面编程方面应用比较广泛">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://paoka1.top/image/post/2023/04/Agent.png">
+<meta property="article:published_time" content="2023-04-07T11:54:28.000Z">
+<meta property="article:modified_time" content="2026-01-04T12:23:56.250Z">
+<meta property="article:author" content="Paoka1">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://paoka1.top/image/post/2023/04/Agent.png">
+
+
+<link rel="canonical" href="https://paoka1.top/2023/04/07/Java-Agent-%E5%85%A5%E9%97%A8/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://paoka1.top/2023/04/07/Java-Agent-%E5%85%A5%E9%97%A8/","path":"2023/04/07/Java-Agent-入门/","title":"Java Agent 入门"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Java Agent 入门 | Paoka1's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Paoka1's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to my blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Java-Agent"><span class="nav-number">1.</span> <span class="nav-text">什么是 Java Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-Agent-%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">Java Agent 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-Agent-%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">Java Agent 实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Agent-%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">Agent 模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attach-API"><span class="nav-number">3.2.</span> <span class="nav-text">Attach API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attach-%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">Attach 模式</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Paoka1"
+      src="/image/favicons/favicon.ico">
+  <p class="site-author-name" itemprop="name">Paoka1</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/paoka1" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;paoka1" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:shauio@163.com" title="E-Mail → mailto:shauio@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://paoka1.top/2023/04/07/Java-Agent-%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/image/favicons/favicon.ico">
+      <meta itemprop="name" content="Paoka1">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Java Agent 入门 | Paoka1's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java Agent 入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-07 19:54:28" itemprop="dateCreated datePublished" datetime="2023-04-07T19:54:28+08:00">2023-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-04 20:23:56" itemprop="dateModified" datetime="2026-01-04T20:23:56+08:00">2026-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>本文简要介绍 Java Agent，快速入门 Java Agent</p>
+<h3 id="什么是-Java-Agent"><a href="#什么是-Java-Agent" class="headerlink" title="什么是 Java Agent"></a>什么是 Java Agent</h3><p>Java Agent 本质上可以理解为一个插件，该插件就是一个精心提供的 Jar 包。只是启动方式和普通 Jar 包有所不同，对于普通的 Jar 包，通过指定类的 main 函数进行启动。但是 Java Agent 并不能单独启动，必须依附在一个 Java 应用程序运行，在面向切面编程方面应用比较广泛</p>
+<span id="more"></span>
+
+<p>Java Agent 的 Jar 包通过 JVMTI（JVM Tool Interface）完成加载，最终借助 JPLISAgent（Java Programming Language Instrumentation Services Agent）完成对目标代码的修改。主要功能如下：</p>
+<ol>
+<li>可以在加载 Java 文件之前做拦截把字节码做修改</li>
+<li>可以在运行期将已经加载的类的字节码做变更</li>
+</ol>
+<p>在 JDK1.5 版本开始，Java 增加了 Instrumentation（Java Agent API）和 JVMTI（JVM Tool Interface）功能，该功能可以实现 JVM 在加载某个 class 文件对其字节码进行修改，也可以对已经加载的字节码进行一个重新的加载。而在 1.6 版本新增了 Attach（附加）方式，可以对运行中的 Java 进程插入 Agent。Java Agent 可以去实现字节码插桩、动态跟踪分析等，比如 RASP 产品和 Java Agent 内存马</p>
+<p>Java Agent 有两种模式：</p>
+<p>启动 Java 程序时添加<code>-javaagent</code>（Instrumentation API 实现方式）或<code>-agentpath/-agentlib</code>（JVMTI 的实现方式）参数，如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -javaagent:XXX.jar Test</span><br></pre></td></tr></table></figure>
+
+<p>JDK1.6 新增了 Attach（附加）方式，可以对运行中的 Java 进程附加 Agent</p>
+<p>这两种运行方式的最大区别在于第一种方式只能在程序启动时指定 Agent 文件，而 Attach 方式可以在 Java 程序运行后根据进程 ID 动态注入 Agent 到 JVM，所以类似于想要注入 Agent 型内存马，一般会用 Attach 的方式</p>
+<h3 id="Java-Agent-简介"><a href="#Java-Agent-简介" class="headerlink" title="Java Agent 简介"></a>Java Agent 简介</h3><p>Java Agent 是 java 命令的一个参数，参数 Java Agent 可以用于指定一个 Jar 包，Java Agent 和普通的 Java 类并没有任何区别，普通的 Java 程序中规定了 main 方法为程序入口，而 Java Agent 则将 premain（Agent 模式）和 agentmain（Attach 模式）作为了 Agent 程序的入口，两者所接受的参数是完全一致的，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String args, Instrumentation inst)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String args, Instrumentation inst)</span></span><br></pre></td></tr></table></figure>
+
+<p>而在 Attach 模式下的<code>premain()</code>方法有两种写法，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs)</span></span><br></pre></td></tr></table></figure>
+
+<p>JVM 会去优先加载带 Instrumentation 签名的方法，加载成功忽略第二种，如果第一种没有，则加载第二种方法，Java Agent 还限制了我们必须以 Jar 包的形式运行或加载，我们必须将编写好的 Agent 程序打包成一个 Jar 文件。除此之外，Java Agent 还强制要求了所有的 Jar 文件中必须包含<code>/META-INF/MANIFEST.MF</code>文件，且该文件中必须定义好<code>Premain-Class</code>或<code>Agent-Class</code>配置，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Premain-Class: com.anbai.sec.agent.CrackLicenseAgent</span><br><span class="line">Agent-Class: com.anbai.sec.agent.CrackLicenseAgent</span><br></pre></td></tr></table></figure>
+
+<p>如果我们需要修改已经被 JVM 加载过的类的字节码，那么还需要设置在<code>MANIFEST.MF</code>中添加：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Can-Retransform-Classes: true</span><br><span class="line">// 或者下面这种</span><br><span class="line">Can-Redefine-Classes: true</span><br></pre></td></tr></table></figure>
+
+<p>以下是几个主要的概念：</p>
+<p><strong>1.ClassFileTransformer</strong></p>
+<p>ClassFileTransformer 是一个转换类文件的代理接口，我们可以在获取到 Instrumentation 对象后通过 addTransformer 方法添加自定义类文件转换器</p>
+<p>使用<code>addTransformer</code>方法可以注册一个我们自定义的 Transformer 到 Java Agent，当有新的类被 JVM 加载时 JVM 会自动回调用我们自定义的 Transformer 类的 transform 方法，传入该类的 transform 信息（类名、类加载器、类字节码等），我们可以根据传入的类信息决定是否需要修改类字节码，修改完字节码后我们将新的类字节码返回给 JVM，JVM 会验证类和相应的修改是否合法，如果符合类加载要求 JVM 会加载我们修改后的类字节码</p>
+<p><strong>重写 transform 方法需要注意以下事项：</strong></p>
+<ol>
+<li>ClassLoader 如果是被 Bootstrap ClassLoader（引导类加载器）所加载那么 loader 参数的值是空</li>
+<li>修改类字节码时需要特别注意插入的代码在对应的 ClassLoader 中可以正确的获取到，否则会报 ClassNotFoundException，比如修改<code>java.io.FileInputStream</code>（该类由 Bootstrap ClassLoader 加载）时插入了我们检测代码，那么我们将必须保证 FileInputStream 能够获取到我们的检测代码类</li>
+<li>JVM 类名的书写方式路径方式：<code>java/lang/String</code>而不是我们常用的类名方式：<code>java.lang.String</code></li>
+<li>类字节必须符合 JVM 校验要求，如果无法验证类字节码会导致 JVM 崩溃或者 VerifyError（类验证错误）</li>
+<li>如果修改的是 retransform 类（修改已被 JVM 加载的类），修改后的类字节码不得新增方法、修改方法参数、类成员变量</li>
+<li>addTransformer 时如果没有传入 retransform 参数（默认是 false）就算<code>MANIFEST.MF</code>中配置了<code>Can-Redefine-Classes: true</code>而且手动调用了<code>retransformClasses</code>方法也一样无法 retransform</li>
+<li>卸载 transform 时需要使用创建时的 Instrumentation 实例</li>
+</ol>
+<p><strong>2.Instrumentation</strong></p>
+<p><code>java.lang.instrument.Instrumentation</code>是监测运行在 JVM 程序的 Java API，利用 Instrumentation 我们可以实现如下功能：</p>
+<ol>
+<li>动态添加或移除自定义的 ClassFileTransformer（addTransformer、removeTransformer），JVM 会在类加载时调用 Agent 中注册的 ClassFileTransformer</li>
+<li>动态修改 classpath（appendToBootstrapClassLoaderSearch、appendToSystemClassLoaderSearch），将 Agent 程序添加到 BootstrapClassLoader 和 SystemClassLoaderSearch（对应的是 ClassLoader 类的 getSystemClassLoader 方法，默认是<code>sun.misc.Launcher$AppClassLoader</code>）中搜索</li>
+<li>动态获取所有 JVM 已加载的类（getAllLoadedClasses）</li>
+<li>动态获取某个类加载器已实例化的所有类（getInitiatedClasses）</li>
+<li>重定义某个已加载的类的字节码（redefineClasses）</li>
+<li>动态设置 JNI 前缀（setNativeMethodPrefix），可以实现 Hook native 方法</li>
+<li>重新加载某个已经被 JVM 加载过的类字节码（retransformClasses）</li>
+</ol>
+<h3 id="Java-Agent-实例"><a href="#Java-Agent-实例" class="headerlink" title="Java Agent 实例"></a>Java Agent 实例</h3><p>写几个小 Demo 来实际体验下 Java Agent，我们需要新建两个项目，一个用来写我们的 Agent（起名：JavaAgent），另一个用来测试 Agent（起名：JavaAgentTest）</p>
+<h4 id="Agent-模式"><a href="#Agent-模式" class="headerlink" title="Agent 模式"></a>Agent 模式</h4><p>先来写一个最简单的 Demo，创建我们的<code>DefineTransformer</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.instrument.ClassFileTransformer;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.IllegalClassFormatException;</span><br><span class="line"><span class="keyword">import</span> java.security.ProtectionDomain;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined, ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) <span class="keyword">throws</span> IllegalClassFormatException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Premain load class: &quot;</span> + className);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们的主类<code>Agent</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.instrument.Instrumentation;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Agent</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;agentArgs: &quot;</span> + agentArgs);</span><br><span class="line">        <span class="comment">// 调用 addTransformer 添加一个 Transformer</span></span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后需要添加一些依赖来打包和生成<code>MANIFEST.MF</code>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-jar-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">archive</span>&gt;</span></span><br><span class="line">                    <span class="comment">&lt;!-- 自动添加 META-INF/MANIFEST.MF --&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">manifest</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">addClasspath</span>&gt;</span>true<span class="tag">&lt;/<span class="name">addClasspath</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Premain-Class</span>&gt;</span>Agent<span class="tag">&lt;/<span class="name">Premain-Class</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Agent-Class</span>&gt;</span>Agent<span class="tag">&lt;/<span class="name">Agent-Class</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Can-Redefine-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Redefine-Classes</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Can-Retransform-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Retransform-Classes</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">archive</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后能生成这样的<code>MANIFEST.MF</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br><span class="line">Premain-Class: Agent</span><br><span class="line">Archiver-Version: Plexus Archiver</span><br><span class="line">Built-By: xxx</span><br><span class="line">Agent-Class: Agent</span><br><span class="line">Can-Redefine-Classes: true</span><br><span class="line">Can-Retransform-Classes: true</span><br><span class="line">Created-By: Apache Maven 3.5.4</span><br><span class="line">Build-Jdk: 1.8.0_341</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>一些可能会用到的参数说明：</p>
+<ol>
+<li>Premain-Class ：包含 premain 方法的类（类的全路径名）</li>
+<li>Agent-Class ：包含 agentmain 方法的类（类的全路径名）</li>
+<li>Boot-Class-Path ：设置引导类加载器搜索的路径列表。查找类的特定于平台的机制失败后，引导类加载器会搜索这些路径。按列出的顺序搜索路径。列表中的路径由一个或多个空格分开。路径使用分层 URI 的路径组件语法。如果该路径以斜杠字符<code>/</code>开头，则为绝对路径，否则为相对路径。相对路径根据代理 Jar 文件的绝对路径解析。忽略格式不正确的路径和不存在的路径。如果代理是在 VM 启动之后某一时刻启动的，则忽略不表示 JAR 文件的路径（可选）</li>
+<li>Can-Redefine-Classes ：true 表示能重定义此代理所需的类，默认值为 false（可选）</li>
+<li>Can-Retransform-Classes ：true 表示能重转换此代理所需的类，默认值为 false （可选）</li>
+<li>Can-Set-Native-Method-Prefix： true 表示能设置此代理所需的本机方法前缀，默认值为 false（可选）</li>
+</ol>
+</blockquote>
+<p>接下来编写我们的测试类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello, world!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先使用 Maven 进行打包（打包为 Jar 文件），再添加对应的 VM 选项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-javaagent:E:\Zodog\Temp\javassist\JavaAgent\target\JavaAgent-1.0-SNAPSHOT.jar</span><br></pre></td></tr></table></figure>
+
+<p>运行测试类，可以看见：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">agentArgs: <span class="literal">null</span></span><br><span class="line">Premain load class: java/util/concurrent/ConcurrentHashMap$ForwardingNode</span><br><span class="line">...</span><br><span class="line">Hello, world!</span><br><span class="line">Premain load class: sun/misc/FloatingDecimal$PreparedASCIIToBinaryBuffer</span><br><span class="line">...</span><br><span class="line">Premain load class: java/lang/Shutdown$Lock</span><br></pre></td></tr></table></figure>
+
+<p>执行 main 方法之前会加载所有的类，包括系统类和自定义类。而在<code>ClassFileTransformer</code>中会去拦截系统类和自己实现的类对象，逻辑则是在<code>ClassFileTransformer</code>实现类的<code>transform</code>方法中定义</p>
+<p>而在这里<code>transform</code>类似于一个<code>filter</code>会去拦截、遍历一些要在 JVM 中加载的类，而在<code>transform</code>方法中我们可以定义一些逻辑，比如<code>if className == xxx</code>时走入一个逻辑去实现 AOP。而其中就可以利用如 Javassist 技术修改字节码并作为<code>transform</code>方法的返回值，这样就在该类在 JVM 中加载前（<code>-javaagent</code>模式）修改了字节码</p>
+<p>再来看另一个例子，使用 Javassist 修改字节码，首先需要在所有项目里添加依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.27.0-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们的<code>DefineTransformer</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javassist.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.ClassFileTransformer;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.IllegalClassFormatException;</span><br><span class="line"><span class="keyword">import</span> java.security.ProtectionDomain;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined, ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) <span class="keyword">throws</span> IllegalClassFormatException &#123;</span><br><span class="line">        <span class="comment">// 打印加载的类</span></span><br><span class="line">        <span class="comment">// System.out.println(&quot;premain load class: &quot; + className);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 使用 / 代替 .</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;Main&quot;</span>.equals(className)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">ClassPool</span> <span class="variable">classPool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">                <span class="comment">// 这里使用 .</span></span><br><span class="line">                <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> classPool.get(<span class="string">&quot;Main&quot;</span>);</span><br><span class="line">                <span class="type">CtMethod</span> <span class="variable">call</span> <span class="operator">=</span> ctClass.getDeclaredMethod(<span class="string">&quot;call&quot;</span>);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 打印后加了一个弹计算器的操作</span></span><br><span class="line">                <span class="type">String</span> <span class="variable">MethodBody</span> <span class="operator">=</span> <span class="string">&quot;&#123;System.out.println(\&quot;say hello ...\&quot;);&quot;</span> + <span class="string">&quot;java.lang.Runtime.getRuntime().exec(\&quot;calc\&quot;);&#125;&quot;</span>;</span><br><span class="line"></span><br><span class="line">                call.setBody(MethodBody);</span><br><span class="line">                <span class="type">byte</span>[] bytes = ctClass.toBytecode();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// detach 的意思是将内存中曾经被 javassist 加载过的 Main 对象移除，如果下次有需要在内存中找不到会重新走 javassist 加载</span></span><br><span class="line">                ctClass.detach();</span><br><span class="line">                <span class="keyword">return</span> bytes;</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">catch</span> (NotFoundException | CannotCompileException | IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其它的类不用变化，运行就可以发现打印了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agentArgs: <span class="literal">null</span></span><br><span class="line">Hello, world!</span><br><span class="line">say hello ...</span><br></pre></td></tr></table></figure>
+
+<p>然后弹出了计算器</p>
+<h4 id="Attach-API"><a href="#Attach-API" class="headerlink" title="Attach API"></a>Attach API</h4><p>在 Java SE 6 以后在<code>Instrumentation</code>接口中提供了新的方法<code>agentmain</code>可以在 main 函数开始运行之后再运行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 采用 attach 机制，被代理的目标程序 VM 有可能很早之前已经启动，当然其所有类已经被加载完成，这个时候需要借助</span></span><br><span class="line"><span class="comment">// Instrumentation#retransformClasses(Class&lt;?&gt;... classes)</span></span><br><span class="line"><span class="comment">// 让对应的类可以重新转换，从而激活重新转换的类执行 ClassFileTransformer 列表中的回调</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span> <span class="params">(String agentArgs, Instrumentation inst)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span> <span class="params">(String agentArgs)</span></span><br></pre></td></tr></table></figure>
+
+<p>同样，agentmain 方法中带 Instrumentation 参数的方法也比不带优先级更高。开发者必须在<code>MANIFEST.MF</code>文件里面设置<code>Agent-Class</code>来指定包含 agentmain 函数的类，在 Java6 以后实现启动后加载的新实现是 Attach API。Attach API 很简单，只有 2 个主要的类，都在<code>com.sun.tools.attach</code>包里面：</p>
+<ol>
+<li>VirtualMachine 字面意义表示一个 Java 虚拟机，也就是程序需要监控的目标虚拟机，提供了获取系统信息，比如获取内存 dump、线程 dump，类信息统计，比如已加载的类以及实例个数等， loadAgent，Attach 和 Detach （Attach 动作的相反行为，从 JVM 上面解除一个代理）等方法，可以实现的功能可以说非常之强大 。该类允许我们通过给 attach 方法传入一个 JVM 的 PID（进程 id），远程连接到 JVM上 。代理类注入操作只是它众多功能中的一个，通过 loadAgent 方法向 JVM 注册一个代理程序 agent，在该 agent 的代理程序中会得到一个 Instrumentation 实例，该实例可以在 class 加载前改变 class 的字节码，也可以在 class 加载后重新加载。在调用 Instrumentation 实例的方法时，这些方法会使用 ClassFileTransformer 接口中提供的方法进行处理</li>
+<li>VirtualMachineDescriptor 则是一个描述虚拟机的容器类，配合 VirtualMachine 类完成各种功能</li>
+</ol>
+<p>Attach 实现动态注入的原理如下：通过 VirtualMachine 类的<code>attach(pid)</code>方法，便可以 attach 到一个运行中的 java 进程上，之后便可以通过<code>loadAgent(agentJarPath)</code>来将 agent 的 Jar 包注入到对应的进程，然后对应的进程会调用 agentmain 方法</p>
+<h4 id="Attach-模式"><a href="#Attach-模式" class="headerlink" title="Attach 模式"></a>Attach 模式</h4><p> 在 JavaAgent 项目中新编写一个 AgentMain 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.instrument.Instrumentation;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.UnmodifiableClassException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AgentMain</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String agentArgs, Instrumentation instrumentation)</span> &#123;</span><br><span class="line">        instrumentation.addTransformer(<span class="keyword">new</span> <span class="title class_">AgentMainTransformer</span>(), <span class="literal">true</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Transformer 添加成功&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 重新加载指定类</span></span><br><span class="line">            instrumentation.retransformClasses(Class.forName(<span class="string">&quot;Main&quot;</span>));</span><br><span class="line">            System.out.println(<span class="string">&quot;retransformClasses 已运行&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (UnmodifiableClassException | ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们需要编写一个 AgentMainTransformer 类，去修改方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javassist.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.ClassFileTransformer;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.IllegalClassFormatException;</span><br><span class="line"><span class="keyword">import</span> java.security.ProtectionDomain;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AgentMainTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined, ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) <span class="keyword">throws</span> IllegalClassFormatException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;在类 &quot;</span> + className + <span class="string">&quot; 执行 transform&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;Main&quot;</span>.equals(className)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;运行 AgentMainTransformer#transform 改变方法&quot;</span>);</span><br><span class="line"></span><br><span class="line">                <span class="type">ClassPool</span> <span class="variable">classPool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">                <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> classPool.get(<span class="string">&quot;Main&quot;</span>);</span><br><span class="line">                <span class="type">CtMethod</span> <span class="variable">call</span> <span class="operator">=</span> ctClass.getDeclaredMethod(<span class="string">&quot;call&quot;</span>);</span><br><span class="line">                <span class="comment">// 为了系统考虑，还是别启动计算器了</span></span><br><span class="line">                <span class="type">String</span> <span class="variable">MethodBody</span> <span class="operator">=</span> <span class="string">&quot;&#123;System.out.println(\&quot;Say goodbye...\&quot;);&#125;&quot;</span>;</span><br><span class="line"></span><br><span class="line">                call.setBody(MethodBody);</span><br><span class="line">                <span class="keyword">return</span> ctClass.toBytecode();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// detach 的意思是将内存中曾经被 javassist 加载过的 Main 对象移除</span></span><br><span class="line">                <span class="comment">// 如果下次有需要在内存中找不到会重新走 javassist 加载</span></span><br><span class="line">                <span class="comment">// ctClass.detach();</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">                <span class="keyword">return</span> classfileBuffer;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 Agent 项目里编写 AgentMainTest，用于注入 Agent：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.tools.attach.*;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AgentMainTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 寻找当前系统中所有运行着的 JVM 进程</span></span><br><span class="line">        List&lt;VirtualMachineDescriptor&gt; list = VirtualMachine.list();</span><br><span class="line">        <span class="keyword">for</span> (VirtualMachineDescriptor vmd : list) &#123;</span><br><span class="line">            <span class="comment">// 如果虚拟机的名称为 xxx 则该虚拟机为目标虚拟机，获取该虚拟机的 PID</span></span><br><span class="line">            <span class="comment">// 然后加载 JavaAgent.jar 发送给该虚拟机</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// vmd.displayName() 看到当前系统都有哪些 JVM 进程在运行</span></span><br><span class="line">            System.out.println(vmd.displayName());</span><br><span class="line">            <span class="keyword">if</span> (vmd.displayName().endsWith(<span class="string">&quot;Main&quot;</span>)) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;----------&quot;</span>);</span><br><span class="line">                System.out.println(<span class="string">&quot;Choose Main...&quot;</span>);</span><br><span class="line">                VirtualMachine virtualMachine;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    virtualMachine = VirtualMachine.attach(vmd.id());</span><br><span class="line">                    virtualMachine.loadAgent(<span class="string">&quot;E:\\Zodog\\Temp\\javassist\\JavaAgent\\target\\JavaAgent-1.0-SNAPSHOT.jar&quot;</span>);</span><br><span class="line">                    virtualMachine.detach();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (AttachNotSupportedException | IOException | AgentLoadException | AgentInitializationException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意修改 Jar 的路径，另外修改 Agent 的<code>pom.xml</code>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.27.0-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>jdk.tools<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jdk.tools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;java.home&#125;/../lib/tools.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-jar-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">archive</span>&gt;</span></span><br><span class="line">                    <span class="comment">&lt;!-- 自动添加 META-INF/MANIFEST.MF --&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">manifest</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">addClasspath</span>&gt;</span>true<span class="tag">&lt;/<span class="name">addClasspath</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Agent-Class</span>&gt;</span>AgentMain<span class="tag">&lt;/<span class="name">Agent-Class</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Can-Redefine-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Redefine-Classes</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Can-Retransform-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Retransform-Classes</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">archive</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>还需要去除我们在前面为测试 Agent 而添加的 VM 选项，改变测试 Agent 项目以前的 Main 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello, world!&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            call();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">call</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Say hello...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后先运行测试 Agent 的类，再运行 Agent 的类，就会出现：</p>
+<p><img src="/image/post/2023/04/Agent.png" alt="Agent"></p>
+<p>这样就成功了，还有些要注意的内容：</p>
+<ol>
+<li>已加载的 Java 类是不会再被 Agent Attach 处理的，所以我们需要调用<code>retransformClasses</code></li>
+<li>premain 和 agentmain 两种方式修改字节码的时机都是类文件加载之后，也就是说必须要带有 Class 类型的参数，不能通过字节码文件和自定义的类名重新定义一个本来不存在的类</li>
+<li>类的字节码修改称为类转换（Class Transform），类转换其实最终都回归到类重定义<code>Instrumentation#redefineClasses()</code>方法，此方法有以下限制：<ul>
+<li>新类和老类的父类必须相同</li>
+<li>新类和老类实现的接口数也要相同，并且是相同的接口</li>
+<li>新类和老类访问符必须一致。 新类和老类字段数和字段名要一致</li>
+<li>新类和老类新增或删除的方法必须是<code>private static/final</code>修饰的</li>
+<li>可以修改方法体</li>
+</ul>
+</li>
+<li>Java Agent 中的所有依赖，在原进程中的 classpath 中都要能找到，否则在注入时原进程会报错 NoClassDefFoundError</li>
+<li>Agent 进程的 classpath 中必须有<code>tools.jar</code>（提供 VirtualMachine Attach API ），JDK 默认有<code>tools.jar</code>，JRE 默认没有。并且 Linux 和 Windows 之间是存在一个适配问题</li>
+</ol>
+<p>到此介绍完毕</p>
+<hr>
+<p>本文参考链接：</p>
+<p><a target="_blank" rel="noopener" href="https://sec-in.com/article/1690">初探Java安全之JavaAgent</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/05/Java-ASM/" rel="prev" title="Java ASM">
+                  <i class="fa fa-angle-left"></i> Java ASM
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/04/09/Go-%E5%8D%8F%E7%A8%8B-Tips/" rel="next" title="Go 协程 Tips">
+                  Go 协程 Tips <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">陕ICP备2022001516号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2022 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Paoka1</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
